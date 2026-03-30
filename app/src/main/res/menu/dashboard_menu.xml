@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/navigation_home"
+        android:icon="@android:drawable/ic_menu_today"
+        android:title="Home" />
+    <item
+        android:id="@+id/navigation_loans"
+        android:icon="@android:drawable/ic_menu_agenda"
+        android:title="Loans" />
+    <item
+        android:id="@+id/navigation_payments"
+        android:icon="@android:drawable/ic_menu_save"
+        android:title="Payments" />
+    <item
+        android:id="@+id/navigation_appointments"
+        android:icon="@android:drawable/ic_menu_month"
+        android:title="Appointments" />
+    <item
+        android:id="@+id/navigation_account"
+        android:icon="@android:drawable/ic_menu_myplaces"
+        android:title="Account" />
+</menu>

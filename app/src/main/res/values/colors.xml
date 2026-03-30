@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Brand Colors -->
+    <color name="primary">#1d4ed8</color>
+    <color name="primary_light">#e0e7ff</color>
+    <color name="primary_dark">#1e3a8a</color>
+
+    <!-- Text Colors -->
+    <color name="text_primary">#0f172a</color>
+    <color name="text_secondary">#64748b</color>
+
+    <!-- Background Colors -->
+    <color name="bg_main">#f8fafc</color>
+    <color name="bg_divider">#e2e8f0</color>
+
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+</resources>

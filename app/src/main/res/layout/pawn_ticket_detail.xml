@@ -1,0 +1,341 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.coordinatorlayout.widget.CoordinatorLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#f1f5f9"
+    android:fitsSystemWindows="true">
+
+    <androidx.core.widget.NestedScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:padding="16dp"
+        android:clipToPadding="false">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <LinearLayout
+                android:id="@+id/btnBack"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:paddingVertical="12dp"
+                android:paddingHorizontal="8dp"
+                android:layout_marginTop="8dp"
+                android:clickable="true"
+                android:focusable="true"
+                android:background="?attr/selectableItemBackground">
+                <ImageView
+                    android:layout_width="16dp"
+                    android:layout_height="16dp"
+                    android:src="@android:drawable/ic_menu_revert"
+                    app:tint="#64748b" />
+                <TextView
+                    android:id="@+id/tvBackToTickets"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginStart="8dp"
+                    android:text="BACK TO MY TICKETS"
+                    android:textColor="#64748b"
+                    android:textSize="11sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.05" />
+            </LinearLayout>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                app:cardCornerRadius="16dp"
+                app:cardElevation="2dp"
+                app:strokeWidth="0dp">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="vertical">
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:background="#0f172a"
+                        android:orientation="vertical"
+                        android:padding="24dp">
+
+                        <RelativeLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content">
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="OFFICIAL VAULT RECORD"
+                                android:textColor="#94a3b8"
+                                android:textSize="9sp"
+                                android:textStyle="bold"
+                                android:letterSpacing="0.1"/>
+
+                            <TextView
+                                android:id="@+id/tvStatusBadge"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_alignParentEnd="true"
+                                android:background="@drawable/badge_active"
+                                android:paddingHorizontal="8dp"
+                                android:paddingVertical="2dp"
+                                android:text="ACTIVE"
+                                android:textColor="#4ade80"
+                                android:textSize="9sp"
+                                android:textStyle="bold" />
+                        </RelativeLayout>
+
+                        <TextView
+                            android:id="@+id/tvTicketNumber"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:text="PT-00000"
+                            android:textColor="@android:color/white"
+                            android:textSize="28sp"
+                            android:fontFamily="sans-serif-black" />
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:orientation="vertical"
+                        android:padding="20dp"
+                        android:background="@android:color/white">
+
+                        <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="ESTIMATED REDEMPTION AMOUNT"
+                            android:textColor="#64748b"
+                            android:textSize="10sp"
+                            android:textStyle="bold"
+                            android:letterSpacing="0.05"/>
+
+                        <TextView
+                            android:id="@+id/tvTotalRedeem"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="₱ 0.00"
+                            android:textColor="#991b1b"
+                            android:textSize="32sp"
+                            android:textStyle="bold"
+                            android:fontFamily="sans-serif-black"/>
+
+                        <View
+                            android:layout_width="match_parent"
+                            android:layout_height="1dp"
+                            android:background="#f1f5f9"
+                            android:layout_marginVertical="16dp"/>
+
+                        <GridLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:columnCount="2">
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_columnWeight="1"
+                                android:orientation="vertical">
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="DUE DATE"
+                                    android:textColor="#ef4444"
+                                    android:textSize="9sp"
+                                    android:textStyle="bold"/>
+                                <TextView
+                                    android:id="@+id/tvDueDate"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="---"
+                                    android:textColor="#1e293b"
+                                    android:textSize="14sp"
+                                    android:textStyle="bold"/>
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:layout_width="0dp"
+                                android:layout_height="wrap_content"
+                                android:layout_columnWeight="1"
+                                android:orientation="vertical"
+                                android:gravity="end">
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="INTEREST ACCRUED"
+                                    android:textColor="#64748b"
+                                    android:textSize="9sp"
+                                    android:textStyle="bold"/>
+                                <TextView
+                                    android:id="@+id/tvInterestVal"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:text="₱ 0.00"
+                                    android:textColor="#1e293b"
+                                    android:textSize="14sp"
+                                    android:textStyle="bold"/>
+                            </LinearLayout>
+                        </GridLayout>
+                    </LinearLayout>
+                </LinearLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="20dp"
+                android:orientation="vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="LOAN PARAMETERS &amp; COLLATERAL"
+                    android:textColor="#64748b"
+                    android:textSize="10sp"
+                    android:textStyle="bold"
+                    android:letterSpacing="0.1"
+                    android:layout_marginStart="4dp"/>
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginTop="8dp"
+                    app:cardCornerRadius="12dp"
+                    app:cardElevation="0dp"
+                    app:strokeWidth="1dp"
+                    app:strokeColor="#e2e8f0">
+
+                    <TableLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:padding="16dp"
+                        android:stretchColumns="1"
+                        android:background="@android:color/white">
+
+                        <TableRow android:paddingVertical="6dp">
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Item Name" android:textColor="#64748b" android:textSize="12sp"/>
+                            <TextView android:id="@+id/tvItemName" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="---" android:textColor="#1e293b" android:textSize="12sp" android:textStyle="bold" android:gravity="end"/>
+                        </TableRow>
+
+                        <TableRow android:paddingVertical="6dp">
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Appraisal Value" android:textColor="#64748b" android:textSize="12sp"/>
+                            <TextView android:id="@+id/tvAppraisalVal" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="₱ 0.00" android:textColor="#1e293b" android:textSize="12sp" android:gravity="end"/>
+                        </TableRow>
+
+                        <TableRow android:paddingVertical="6dp">
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Principal Loan" android:textColor="#64748b" android:textSize="12sp"/>
+                            <TextView android:id="@+id/tvPrincipalVal" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="₱ 0.00" android:textColor="#1e293b" android:textSize="12sp" android:gravity="end"/>
+                        </TableRow>
+
+                        <TableRow android:paddingVertical="6dp">
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Interest Rate" android:textColor="#64748b" android:textSize="12sp"/>
+                            <TextView android:id="@+id/tvRateVal" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="0.0%" android:textColor="#1e293b" android:textSize="12sp" android:gravity="end"/>
+                        </TableRow>
+
+                        <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#f1f5f9" android:layout_marginVertical="8dp"/>
+
+                        <TableRow android:paddingVertical="6dp">
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Late Penalties" android:textColor="#64748b" android:textSize="12sp"/>
+                            <TextView android:id="@+id/tvPenaltyVal" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="₱ 0.00" android:textColor="#ef4444" android:textSize="12sp" android:textStyle="bold" android:gravity="end"/>
+                        </TableRow>
+
+                        <TableRow android:paddingVertical="6dp">
+                            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Loan Issued" android:textColor="#64748b" android:textSize="12sp"/>
+                            <TextView android:id="@+id/tvLoanDate" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="---" android:textColor="#64748b" android:textSize="12sp" android:gravity="end"/>
+                        </TableRow>
+                    </TableLayout>
+                </com.google.android.material.card.MaterialCardView>
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="24dp"
+                android:text="PAYMENT PROJECTION SCHEDULE"
+                android:textColor="#64748b"
+                android:textSize="10sp"
+                android:textStyle="bold"
+                android:letterSpacing="0.1"
+                android:layout_marginStart="4dp"/>
+
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="1dp"
+                app:strokeColor="#e2e8f0">
+
+                <TableLayout
+                    android:id="@+id/tableProjection"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="@android:color/white">
+
+                    <TableRow android:background="#f8fafc" android:padding="12dp">
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:text="CYCLE" android:textSize="9sp" android:textStyle="bold" android:layout_weight="1" android:textColor="#94a3b8"/>
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:text="RENEW" android:textSize="9sp" android:textStyle="bold" android:layout_weight="1.2" android:textColor="#94a3b8" android:gravity="end"/>
+                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:text="REDEEM" android:textSize="9sp" android:textStyle="bold" android:layout_weight="1.2" android:textColor="#94a3b8" android:gravity="end"/>
+                    </TableRow>
+
+                </TableLayout>
+            </com.google.android.material.card.MaterialCardView>
+
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="12dp"
+                android:text="* System Projection: Month 1 is Principal Only. Monthly interest increases by 5% post-maturity per store policy."
+                android:textColor="#94a3b8"
+                android:textSize="9sp"
+                android:fontStyle="italic"
+                android:paddingHorizontal="4dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="32dp"
+                android:layout_marginBottom="32dp"
+                android:orientation="vertical">
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnPayOnline"
+                    android:layout_width="match_parent"
+                    android:layout_height="60dp"
+                    android:text="PAY ONLINE NOW"
+                    android:textAllCaps="true"
+                    android:textColor="@android:color/white"
+                    android:textStyle="bold"
+                    app:backgroundTint="#0f172a"
+                    app:icon="@android:drawable/ic_menu_send"
+                    app:iconTint="@android:color/white"
+                    app:cornerRadius="12dp" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/btnPrintTicket"
+                    android:layout_width="match_parent"
+                    android:layout_height="54dp"
+                    android:layout_marginTop="12dp"
+                    android:text="View Ticket PDF"
+                    android:textAllCaps="true"
+                    android:textColor="#1e293b"
+                    app:strokeColor="#e2e8f0"
+                    app:strokeWidth="1dp"
+                    app:backgroundTint="@android:color/white"
+                    app:cornerRadius="12dp" />
+            </LinearLayout>
+
+        </LinearLayout>
+    </androidx.core.widget.NestedScrollView>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>
