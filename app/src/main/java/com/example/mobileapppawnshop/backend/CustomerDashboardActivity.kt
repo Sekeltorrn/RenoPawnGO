@@ -31,14 +31,61 @@ class CustomerDashboardActivity : AppCompatActivity() {
         // Keep the beautiful UI routing from the GitHub version
         setupBottomNavigation()
         setupClickListeners()
+        
+        // Fetch active tickets for the preview pane
+        fetchDashboardTickets()
+    }
 
-        // Note: The programmatic setOnClickListener for btnLogout was intentionally removed
-        // because we are now relying entirely on the Nuclear XML Function below!
+    private fun fetchDashboardTickets() {
+        val realCustomerId = sessionManager.getCustomerId() ?: ""
+        val realShopCode = sessionManager.getShopCode() ?: ""
+
+        val rvDashboardTickets = findViewById<androidx.recyclerview.widget.RecyclerView>(R.id.rvDashboardTickets)
+        val tvEmptyDashboard = findViewById<TextView>(R.id.tvEmptyDashboard)
+        rvDashboardTickets.layoutManager = androidx.recyclerview.widget.LinearLayoutManager(this)
+
+        if (realCustomerId.isNotEmpty() && realShopCode.isNotEmpty()) {
+            ApiClient.apiService.getActiveTickets(realCustomerId, realShopCode, "active").enqueue(object : retrofit2.Callback<com.example.mobileapppawnshop.data.model.TicketResponse> {
+                override fun onResponse(call: retrofit2.Call<com.example.mobileapppawnshop.data.model.TicketResponse>, response: retrofit2.Response<com.example.mobileapppawnshop.data.model.TicketResponse>) {
+                    if (response.isSuccessful && response.body()?.success == true) {
+                        val ticketsList = response.body()?.tickets ?: emptyList()
+                        val sortedTickets = ticketsList.sortedBy { it.due_date }.take(3)
+                        
+                        if (sortedTickets.isNotEmpty()) {
+                            rvDashboardTickets.adapter = PawnTicketAdapter(sortedTickets, true)
+                            rvDashboardTickets.visibility = View.VISIBLE
+                            tvEmptyDashboard.visibility = View.GONE
+                        } else {
+                            rvDashboardTickets.visibility = View.GONE
+                            tvEmptyDashboard.visibility = View.VISIBLE
+                        }
+                    } else {
+                        rvDashboardTickets.visibility = View.GONE
+                        tvEmptyDashboard.visibility = View.VISIBLE
+                    }
+                }
+
+                override fun onFailure(call: retrofit2.Call<com.example.mobileapppawnshop.data.model.TicketResponse>, t: Throwable) {
+                    rvDashboardTickets.visibility = View.GONE
+                    tvEmptyDashboard.visibility = View.VISIBLE
+                }
+            })
+        } else {
+            tvEmptyDashboard.visibility = View.VISIBLE
+        }
     }
 
     private fun setupClickListeners() {
         findViewById<MaterialCardView>(R.id.btnLoan).setOnClickListener {
             val intent = Intent(this, PawnTicketActiveActivity::class.java)
+            startActivity(intent)
+        }
+        findViewById<MaterialCardView>(R.id.btnPayments).setOnClickListener {
+            val intent = Intent(this, PaymentsActivity::class.java)
+            startActivity(intent)
+        }
+        findViewById<MaterialCardView>(R.id.btnAppointments).setOnClickListener {
+            val intent = Intent(this, AppointmentActivity::class.java)
             startActivity(intent)
         }
         findViewById<MaterialCardView>(R.id.btnAccount).setOnClickListener {

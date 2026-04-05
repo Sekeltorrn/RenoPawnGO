@@ -36,8 +36,9 @@ class AccountUpdateActivity : AppCompatActivity() {
 
     private lateinit var sessionManager: SessionManager
     private var selectedImageUri: Uri? = null
+    private var selectedImageUriBack: Uri? = null
 
-    // Photo Picker Launcher
+    // Photo Picker Launcher (FRONT)
     private val pickImageLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
             selectedImageUri = it
@@ -45,7 +46,19 @@ class AccountUpdateActivity : AppCompatActivity() {
             ivPreview.setImageURI(it)
             ivPreview.scaleType = ImageView.ScaleType.CENTER_CROP
             ivPreview.setPadding(0, 0, 0, 0)
-            findViewById<TextView>(R.id.tvPhotoHint).text = "Photo Selected"
+            findViewById<TextView>(R.id.tvPhotoHint).text = "Front Photo Selected"
+        }
+    }
+
+    // Photo Picker Launcher (BACK)
+    private val pickImageLauncherBack = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri?.let {
+            selectedImageUriBack = it
+            val ivPreviewBack = findViewById<ImageView>(R.id.ivIdPhotoPreviewBack)
+            ivPreviewBack.setImageURI(it)
+            ivPreviewBack.scaleType = ImageView.ScaleType.CENTER_CROP
+            ivPreviewBack.setPadding(0, 0, 0, 0)
+            findViewById<TextView>(R.id.tvPhotoHintBack).text = "Back Photo Selected"
         }
     }
 
@@ -132,9 +145,14 @@ class AccountUpdateActivity : AppCompatActivity() {
             Toast.makeText(this, "Edit Address", Toast.LENGTH_SHORT).show()
         }
 
-        // Photo Upload
+        // Photo Upload (Front)
         findViewById<MaterialCardView>(R.id.btnSelectPhoto).setSmoothClickListener {
             pickImageLauncher.launch("image/*")
+        }
+
+        // Photo Upload (Back)
+        findViewById<MaterialCardView>(R.id.btnSelectPhotoBack).setSmoothClickListener {
+            pickImageLauncherBack.launch("image/*")
         }
 
         // ID Submission
@@ -150,10 +168,9 @@ class AccountUpdateActivity : AppCompatActivity() {
 
     private fun handleIdSubmission() {
         val idType = findViewById<AutoCompleteTextView>(R.id.actvIdType).text.toString()
-        val idNumber = findViewById<EditText>(R.id.etIdNumber).text.toString()
         
-        if (idType.isEmpty() || idNumber.isEmpty() || selectedImageUri == null) {
-            Toast.makeText(this, "Please fill all fields and select a photo.", Toast.LENGTH_SHORT).show()
+        if (idType.isEmpty() || selectedImageUri == null || selectedImageUriBack == null) {
+            Toast.makeText(this, "Please select ID type and both photos.", Toast.LENGTH_SHORT).show()
             return
         }
 
@@ -172,18 +189,31 @@ class AccountUpdateActivity : AppCompatActivity() {
 
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                // 1. Process the physical file from the Android URI
+                // 1. Process the physical files from the Android URIs
                 val contentResolver = applicationContext.contentResolver
-                val inputStream = contentResolver.openInputStream(selectedImageUri!!)
-                val tempFile = File(cacheDir, "kyc_upload_${System.currentTimeMillis()}.jpg")
-                val outputStream = FileOutputStream(tempFile)
-                inputStream?.copyTo(outputStream)
-                inputStream?.close()
-                outputStream.close()
+                
+                // Front Image
+                val inputStreamFront = contentResolver.openInputStream(selectedImageUri!!)
+                val tempFileFront = File(cacheDir, "kyc_front_${System.currentTimeMillis()}.jpg")
+                val outputStreamFront = FileOutputStream(tempFileFront)
+                inputStreamFront?.copyTo(outputStreamFront)
+                inputStreamFront?.close()
+                outputStreamFront.close()
+
+                // Back Image
+                val inputStreamBack = contentResolver.openInputStream(selectedImageUriBack!!)
+                val tempFileBack = File(cacheDir, "kyc_back_${System.currentTimeMillis()}.jpg")
+                val outputStreamBack = FileOutputStream(tempFileBack)
+                inputStreamBack?.copyTo(outputStreamBack)
+                inputStreamBack?.close()
+                outputStreamBack.close()
 
                 // 2. Prepare the exact Multipart Data the PHP server expects
-                val requestFile = tempFile.asRequestBody("image/jpeg".toMediaTypeOrNull())
-                val imageBody = MultipartBody.Part.createFormData("id_document", tempFile.name, requestFile)
+                val requestFileFront = tempFileFront.asRequestBody("image/jpeg".toMediaTypeOrNull())
+                val imageBodyFront = MultipartBody.Part.createFormData("id_document", tempFileFront.name, requestFileFront)
+                
+                val requestFileBack = tempFileBack.asRequestBody("image/jpeg".toMediaTypeOrNull())
+                val imageBodyBack = MultipartBody.Part.createFormData("id_document_back", tempFileBack.name, requestFileBack)
                 
                 val customerIdBody = currentCustomerId.toRequestBody("text/plain".toMediaTypeOrNull())
                 
@@ -191,9 +221,9 @@ class AccountUpdateActivity : AppCompatActivity() {
                 val schemaName = sessionManager.getSchemaName() ?: "tenant_pwn_18e601"
                 val tenantSchemaBody = schemaName.toRequestBody("text/plain".toMediaTypeOrNull())
 
-                // 🔥 NEW: Package the ID Type and Number so PHP can read them!
+                // Hardcoded ID number for API compatibility since the field was removed
                 val idTypeBody = idType.toRequestBody("text/plain".toMediaTypeOrNull())
-                val idNumberBody = idNumber.toRequestBody("text/plain".toMediaTypeOrNull())
+                val idNumberBody = "N/A".toRequestBody("text/plain".toMediaTypeOrNull())
 
                 // 3. Fire the secure network request with ALL parameters
                 val response = ApiClient.apiService.uploadKyc(
@@ -201,13 +231,15 @@ class AccountUpdateActivity : AppCompatActivity() {
                     tenantSchemaBody, 
                     idTypeBody, 
                     idNumberBody, 
-                    imageBody
+                    imageBodyFront,
+                    imageBodyBack
                 )
 
                 withContext(Dispatchers.Main) {
                     if (response.isSuccessful) {
-                        // Success! Clean up the temp file
-                        tempFile.delete()
+                        // Success! Clean up temp files
+                        tempFileFront.delete()
+                        tempFileBack.delete()
 
                         Toast.makeText(this@AccountUpdateActivity, "Document securely submitted. Pending Admin Review.", Toast.LENGTH_LONG).show()
                         

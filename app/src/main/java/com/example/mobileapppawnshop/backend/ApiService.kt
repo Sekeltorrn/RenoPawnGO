@@ -31,7 +31,8 @@ interface ApiService {
         @Part("tenant_schema") tenantSchema: RequestBody,
         @Part("id_type") idType: RequestBody,
         @Part("id_number") idNumber: RequestBody,
-        @Part idDocument: MultipartBody.Part
+        @Part idDocument: MultipartBody.Part,
+        @Part idDocumentBack: MultipartBody.Part
     ): Response<KycResponse>
 
     @POST("api/mobile_checkout.php")
@@ -40,7 +41,7 @@ interface ApiService {
     @GET("api/get_payment_history.php")
     fun getPaymentHistory(
         @Query("customer_id") customerId: String, 
-        @Query("tenant_schema") tenantSchema: String
+        @Query("shop_code") shopCode: String
     ): Call<PaymentHistoryResponse>
 }
 
@@ -72,6 +73,7 @@ data class PaymentHistoryResponse(
 )
 
 data class PaymentRecord(
+    val payment_id: String?,
     val pawn_ticket_no: String, 
     val amount: Double, 
     val payment_date: String, 

@@ -171,13 +171,18 @@ class PawnTicketActiveActivity : AppCompatActivity() {
             return
         }
 
+        android.util.Log.d("DEBUG_LOANS", "Fetching loans - Customer ID: $realCustomerId | Shop Code: $realShopCode | Status: $status")
+
         ApiClient.apiService.getActiveTickets(realCustomerId, realShopCode, status).enqueue(object : Callback<TicketResponse> {
             override fun onResponse(call: Call<TicketResponse>, response: Response<TicketResponse>) {
                 if (response.isSuccessful && response.body()?.success == true) {
                     ticketsList = response.body()?.tickets ?: emptyList()
-                    ticketAdapter.updateData(ticketsList)
+                    
+                    // NEW: Ensure tickets are properly sorted by Due Date before pushing to UI
+                    val sortedTickets = ticketsList.sortedBy { it.due_date }
+                    ticketAdapter.updateData(sortedTickets)
 
-                    if (ticketsList.isNotEmpty()) {
+                    if (sortedTickets.isNotEmpty()) {
                         rvActiveTickets.visibility = View.VISIBLE
                         findViewById<View>(R.id.infoContainer).visibility = View.GONE
                     } else {

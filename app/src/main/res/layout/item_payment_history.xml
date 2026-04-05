@@ -19,6 +19,7 @@
 
         <!-- Icon / Type Indicator -->
         <com.google.android.material.card.MaterialCardView
+            android:id="@+id/cardIconBackground"
             android:layout_width="44dp"
             android:layout_height="44dp"
             app:cardBackgroundColor="#f0f9ff"

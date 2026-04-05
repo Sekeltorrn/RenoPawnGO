@@ -1,0 +1,149 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="#f8fafc"
+    android:padding="24dp">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Payment Receipt"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:textColor="#0f172a"
+        android:textAlignment="center"
+        android:layout_marginBottom="24dp"/>
+
+    <com.google.android.material.card.MaterialCardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="16dp"
+        app:cardElevation="4dp"
+        app:cardBackgroundColor="@android:color/white">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <View
+                android:id="@+id/vHeaderColor"
+                android:layout_width="match_parent"
+                android:layout_height="8dp"
+                android:background="#2E7D32"/>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:padding="24dp">
+
+                <TextView
+                    android:id="@+id/tvShopName"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="RenoGO Shop"
+                    android:textSize="18sp"
+                    android:textStyle="bold"
+                    android:textColor="#475569"
+                    android:textAlignment="center"/>
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="Total Amount Paid"
+                    android:textSize="14sp"
+                    android:textColor="#64748b"
+                    android:textAlignment="center"
+                    android:layout_marginTop="24dp"/>
+
+                <TextView
+                    android:id="@+id/tvAmountPaid"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="₱0.00"
+                    android:textSize="36sp"
+                    android:textStyle="bold"
+                    android:textColor="#0f172a"
+                    android:textAlignment="center"
+                    android:layout_marginTop="4dp"/>
+                
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="#e2e8f0"
+                    android:layout_marginTop="24dp"
+                    android:layout_marginBottom="24dp"/>
+
+                <TableLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+                    <TableRow android:layout_marginBottom="12dp">
+                        <TextView
+                            android:text="Date"
+                            android:textColor="#64748b"
+                            android:layout_weight="1"/>
+                        <TextView
+                            android:id="@+id/tvPaymentDate"
+                            android:text="---"
+                            android:textColor="#1e293b"
+                            android:textStyle="bold"
+                            android:gravity="end"
+                            android:layout_weight="1"/>
+                    </TableRow>
+                    <TableRow android:layout_marginBottom="12dp">
+                        <TextView
+                            android:text="Ticket Number"
+                            android:textColor="#64748b"
+                            android:layout_weight="1"/>
+                        <TextView
+                            android:id="@+id/tvTicketNo"
+                            android:text="---"
+                            android:textColor="#1e293b"
+                            android:textStyle="bold"
+                            android:gravity="end"
+                            android:layout_weight="1"/>
+                    </TableRow>
+                    <TableRow android:layout_marginBottom="12dp">
+                        <TextView
+                            android:text="Payment Type"
+                            android:textColor="#64748b"
+                            android:layout_weight="1"/>
+                        <TextView
+                            android:id="@+id/tvPaymentType"
+                            android:text="---"
+                            android:textColor="#1e293b"
+                            android:textStyle="bold"
+                            android:gravity="end"
+                            android:layout_weight="1"/>
+                    </TableRow>
+                    <TableRow>
+                        <TextView
+                            android:text="Reference No."
+                            android:textColor="#64748b"
+                            android:layout_weight="1"/>
+                        <TextView
+                            android:id="@+id/tvReferenceNo"
+                            android:text="---"
+                            android:textColor="#1e293b"
+                            android:textStyle="bold"
+                            android:gravity="end"
+                            android:layout_weight="1"/>
+                    </TableRow>
+                </TableLayout>
+
+            </LinearLayout>
+        </LinearLayout>
+    </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnClose"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:layout_marginTop="32dp"
+        android:text="Close Receipt"
+        app:cornerRadius="12dp"/>
+</LinearLayout>

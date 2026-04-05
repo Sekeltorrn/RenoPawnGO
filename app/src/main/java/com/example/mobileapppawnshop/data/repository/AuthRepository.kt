@@ -95,7 +95,7 @@ class AuthRepository {
         }
     }
 
-    fun verifyCode(email: String, code: String, type: String): Boolean {
+    fun verifyCode(email: String, code: String, type: String, shopCode: String): Boolean {
         return try {
             val url = URL(verifyUrl) // Points to api/
             val conn = url.openConnection() as HttpURLConnection
@@ -110,6 +110,7 @@ class AuthRepository {
                 put("email", email)
                 put("code", code)
                 put("type", type)
+                put("shop_code", shopCode)
             }
 
             conn.outputStream.use { it.write(json.toString().toByteArray()) }
@@ -123,7 +124,7 @@ class AuthRepository {
         }
     }
 
-    fun sendLoginOtp(email: String): Boolean {
+    fun sendLoginOtp(email: String, shopCode: String): Boolean {
         return try {
             val url = URL(sendOtpUrl) // Points to api/
             val conn = url.openConnection() as HttpURLConnection
@@ -136,6 +137,7 @@ class AuthRepository {
 
             val json = JSONObject().apply {
                 put("email", email)
+                put("shop_code", shopCode)
             }
 
             conn.outputStream.use { it.write(json.toString().toByteArray()) }

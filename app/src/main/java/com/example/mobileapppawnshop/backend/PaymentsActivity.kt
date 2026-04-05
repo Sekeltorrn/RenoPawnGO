@@ -90,6 +90,13 @@ class PaymentsActivity : AppCompatActivity() {
         rvHistory.layoutManager = LinearLayoutManager(this)
         historyAdapter = PaymentHistoryAdapter(emptyList())
         rvHistory.adapter = historyAdapter
+
+        findViewById<TextView>(R.id.tvViewAll).setOnClickListener {
+            historyAdapter.isExpanded = !historyAdapter.isExpanded
+            val tv = it as TextView
+            tv.text = if (historyAdapter.isExpanded) "Hide" else "View All"
+            historyAdapter.notifyDataSetChanged()
+        }
     }
 
     private fun fetchLiveTickets() {
@@ -133,11 +140,13 @@ class PaymentsActivity : AppCompatActivity() {
 
     private fun fetchPaymentHistory() {
         val customerId = sessionManager.getCustomerId() ?: ""
-        val schemaName = sessionManager.getSchemaName() ?: ""
+        val shopCode = sessionManager.getShopCode() ?: ""
 
-        if (customerId.isEmpty()) return
+        if (customerId.isEmpty() || shopCode.isEmpty()) return
 
-        ApiClient.apiService.getPaymentHistory(customerId, schemaName).enqueue(object : Callback<PaymentHistoryResponse> {
+        android.util.Log.d("DEBUG_PAYMENTS", "Fetching payments - Customer ID: $customerId | Shop Code: $shopCode")
+
+        ApiClient.apiService.getPaymentHistory(customerId, shopCode).enqueue(object : Callback<PaymentHistoryResponse> {
             override fun onResponse(call: Call<PaymentHistoryResponse>, response: Response<PaymentHistoryResponse>) {
                 val body = response.body()
                 
@@ -148,16 +157,22 @@ class PaymentsActivity : AppCompatActivity() {
                         findViewById<RecyclerView>(R.id.rvPaymentHistory).visibility = View.VISIBLE
                         historyAdapter.updateData(body.history)
                     } else {
+                        if (!body.success) {
+                            android.util.Log.e("API_ERROR", "Payment History API returned success=false: ${body.message}")
+                            Toast.makeText(this@PaymentsActivity, "API Error: ${body.message}", Toast.LENGTH_LONG).show()
+                        }
                         // API responded, but history is empty (or success is false)
                         findViewById<View>(R.id.cardEmptyHistory).visibility = View.VISIBLE
                         findViewById<RecyclerView>(R.id.rvPaymentHistory).visibility = View.GONE
                     }
                 } else {
+                    android.util.Log.e("API_ERROR", "Server Error: ${response.code()} ${response.message()}")
                     Toast.makeText(this@PaymentsActivity, "Server Error: Could not load history", Toast.LENGTH_SHORT).show()
                 }
             }
 
             override fun onFailure(call: Call<PaymentHistoryResponse>, t: Throwable) {
+                android.util.Log.e("API_ERROR", "Network Failure: ${t.message}", t)
                 Toast.makeText(this@PaymentsActivity, "Network Error: ${t.message}", Toast.LENGTH_LONG).show()
             }
         })

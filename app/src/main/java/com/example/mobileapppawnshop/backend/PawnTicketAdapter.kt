@@ -9,7 +9,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.mobileapppawnshop.R
 import com.example.mobileapppawnshop.data.model.PawnTicket
 
-class PawnTicketAdapter(private var tickets: List<PawnTicket>) : RecyclerView.Adapter<PawnTicketAdapter.TicketViewHolder>() {
+class PawnTicketAdapter(private var tickets: List<PawnTicket>, private val isDashboard: Boolean = false) : RecyclerView.Adapter<PawnTicketAdapter.TicketViewHolder>() {
 
     class TicketViewHolder(view: View) : RecyclerView.ViewHolder(view) {
         val tvItemName: TextView = view.findViewById(R.id.tvItemName)
@@ -32,18 +32,22 @@ class PawnTicketAdapter(private var tickets: List<PawnTicket>) : RecyclerView.Ad
         holder.tvPrincipal.text = "₱${ticket.principal_amount}"
         holder.tvDueDate.text = "Due: ${ticket.due_date}"
 
+        if (isDashboard) {
+            holder.tvPrincipal.visibility = View.GONE
+        } else {
+            holder.tvPrincipal.visibility = View.VISIBLE
+        }
+
         // --- CLICK LISTENER: Pass the data to the Detail Screen ---
         holder.itemView.setOnClickListener {
             val context = holder.itemView.context
             val intent = Intent(context, PawnTicketDetailActivity::class.java).apply {
                 putExtra("TICKET_NO", ticket.pawn_ticket_no.toString())
                 putExtra("PRINCIPAL", ticket.principal_amount.toString())
-                // Ensure field names match get_my_tickets.php response
                 putExtra("ITEM_NAME", ticket.inventory?.item_name ?: "Vault Item")
                 putExtra("DUE_DATE", ticket.due_date)
                 putExtra("STATUS", ticket.status)
-                putExtra("MATURITY_DATE", ticket.maturity_date)
-                putExtra("EXPIRATION_DATE", ticket.expiration_date)
+                putExtra("LOAN_DATE", "") 
             }
             context.startActivity(intent)
         }

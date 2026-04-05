@@ -34,6 +34,7 @@ class AccountVerifyActivity : AppCompatActivity() {
         val fullName = intent.getStringExtra("full_name") ?: "Customer"
         val customerId = intent.getStringExtra("customer_id") ?: ""
         val isFromLogin = intent.getBooleanExtra("is_from_login", false)
+        val shopCode = intent.getStringExtra("shop_code") ?: sessionManager.getShopCode() ?: ""
 
         tvEmailInfo.text = "Enter the 6-digit code sent to \n$email"
 
@@ -58,7 +59,7 @@ class AccountVerifyActivity : AppCompatActivity() {
                  */
                 val verificationType = if (isFromLogin) "magiclink" else "signup"
 
-                viewModel.verifyCode(email, code, verificationType)
+                viewModel.verifyCode(email, code, verificationType, shopCode)
             } else {
                 Toast.makeText(this, "Please enter 6-digit code", Toast.LENGTH_SHORT).show()
             }

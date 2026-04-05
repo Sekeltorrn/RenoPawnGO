@@ -92,6 +92,9 @@ class SessionManager(context: Context) {
         editor.remove(KEY_EMAIL)
         editor.remove(KEY_NAME)
         editor.remove(KEY_CUSTOMER_ID)
+        editor.remove(KEY_SHOP_CODE)
+        editor.remove(KEY_SCHEMA_NAME)
+        editor.remove(KEY_SHOP_NAME)
         editor.apply()
     }
 

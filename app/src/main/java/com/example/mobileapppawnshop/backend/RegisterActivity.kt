@@ -89,6 +89,7 @@ class RegisterActivity : AppCompatActivity() {
                 // SUCCESS: Grab the email they just typed
                 val emailStr = etEmail.text.toString()
 
+                /* TODO: AUTH BYPASS ACTIVE. Uncomment this block when Email OTP is re-enabled.
                 Toast.makeText(this, "Registration successful! Please verify your email.", Toast.LENGTH_SHORT).show()
 
                 // Open the Verification Screen and hand it the email
@@ -97,6 +98,16 @@ class RegisterActivity : AppCompatActivity() {
                 }
                 startActivity(intent)
                 finish() // Close the register screen so they can't go "back" to it
+                */
+
+                // TEMPORARY BYPASS NAVIGATION
+                Toast.makeText(this, "Registration successful!", Toast.LENGTH_SHORT).show()
+                val intent = Intent(this, SuccessConfirmationActivity::class.java).apply {
+                    putExtra("message", "Registration Successful!")
+                    putExtra("sub_message", "Your account is now pending admin approval. Please wait for the shop to verify your details.")
+                }
+                startActivity(intent)
+                finish()
             } else {
                 Toast.makeText(this, "Registration failed or Email already exists", Toast.LENGTH_LONG).show()
             }

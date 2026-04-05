@@ -50,12 +50,12 @@ class AuthViewModel : ViewModel() {
     }
 
     /**
-     * UPDATED: Now accepts 'type' (signup or recovery)
-     * This ensures verify.php knows whether to insert a new customer into the DB.
+     * UPDATED: Now accepts 'type' (signup or recovery) and 'shopCode'
+     * This ensures verify.php knows which tenant schema to verify against.
      */
-    fun verifyCode(email: String, code: String, type: String = "signup") {
+    fun verifyCode(email: String, code: String, type: String = "signup", shopCode: String = "") {
         thread {
-            val success = repository.verifyCode(email, code, type)
+            val success = repository.verifyCode(email, code, type, shopCode)
             _verificationResult.postValue(success)
         }
     }
@@ -63,9 +63,9 @@ class AuthViewModel : ViewModel() {
     /**
      * Sends a new 6-digit code for Login (2FA)
      */
-    fun sendLoginOtp(email: String) {
+    fun sendLoginOtp(email: String, shopCode: String = "") {
         thread {
-            val success = repository.sendLoginOtp(email)
+            val success = repository.sendLoginOtp(email, shopCode)
             _otpSentResult.postValue(success)
         }
     }

@@ -81,6 +81,9 @@
             android:name=".backend.PaymentsActivity"
             android:exported="false" />
         <activity
+            android:name=".backend.PaymentDetailActivity"
+            android:exported="false" />
+        <activity
             android:name=".backend.AppointmentActivity"
             android:exported="false" />
         <activity

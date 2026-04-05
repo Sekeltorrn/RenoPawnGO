@@ -29,48 +29,56 @@ import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
 
+import androidx.compose.foundation.clickable
+
 class KycViewModel : ViewModel() {
     var uploadStatus by mutableStateOf<String?>(null)
     var isUploading by mutableStateOf(false)
 
     fun uploadId(
         context: android.content.Context,
-        uri: Uri,
+        frontUri: Uri,
+        backUri: Uri,
         customerId: String,
-        tenantSchema: String,
-        idType: String,
-        idNumber: String
+        tenantSchema: String
     ) {
         viewModelScope.launch {
             isUploading = true
             uploadStatus = "Preparing upload..."
 
-            val file = FileUtils.uriToFile(context, uri)
-            if (file == null) {
+            val fileFront = FileUtils.uriToFile(context, frontUri)
+            val fileBack = FileUtils.uriToFile(context, backUri)
+            
+            if (fileFront == null || fileBack == null) {
                 uploadStatus = "Error: File processing failed"
                 isUploading = false
                 return@launch
             }
 
-            val requestFile = file.asRequestBody("image/jpeg".toMediaTypeOrNull())
-            val body = MultipartBody.Part.createFormData("id_document", file.name, requestFile)
+            val requestFileFront = fileFront.asRequestBody("image/jpeg".toMediaTypeOrNull())
+            val bodyFront = MultipartBody.Part.createFormData("id_document", fileFront.name, requestFileFront)
+            
+            val requestFileBack = fileBack.asRequestBody("image/jpeg".toMediaTypeOrNull())
+            val bodyBack = MultipartBody.Part.createFormData("id_document_back", fileBack.name, requestFileBack)
+
             val customerIdPart = customerId.toRequestBody("text/plain".toMediaTypeOrNull())
             val tenantPart = tenantSchema.toRequestBody("text/plain".toMediaTypeOrNull())
-            val idTypePart = idType.toRequestBody("text/plain".toMediaTypeOrNull())
-            val idNumberPart = idNumber.toRequestBody("text/plain".toMediaTypeOrNull())
+            // Pass legacy strings dynamically
+            val idTypePart = "Dual Image Upload".toRequestBody("text/plain".toMediaTypeOrNull())
+            val idNumberPart = "N/A".toRequestBody("text/plain".toMediaTypeOrNull())
 
             try {
-                // FIXED: Passing all 5 parameters and handling Response wrapper
                 val response = ApiClient.apiService.uploadKyc(
                     customerIdPart,
                     tenantPart,
                     idTypePart,
                     idNumberPart,
-                    body
+                    bodyFront,
+                    bodyBack
                 )
 
                 if (response.isSuccessful && response.body()?.success == true) {
-                    uploadStatus = "Upload Successful!"
+                    uploadStatus = "Verification Uploaded Successfully!"
                 } else {
                     uploadStatus = "Error: ${response.body()?.message ?: "Server Error"}"
                 }
@@ -98,16 +106,20 @@ class KycUploadActivity : ComponentActivity() {
 
 @Composable
 fun KycUploadScreen(customerId: String, tenantSchema: String, viewModel: KycViewModel = viewModel()) {
-    var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
-    var idType by remember { mutableStateOf("") }
-    var idNumber by remember { mutableStateOf("") }
+    var frontImageUri by remember { mutableStateOf<Uri?>(null) }
+    var backImageUri by remember { mutableStateOf<Uri?>(null) }
 
     val context = androidx.compose.ui.platform.LocalContext.current
     val scrollState = rememberScrollState()
 
-    val photoPickerLauncher = rememberLauncherForActivityResult(
+    val frontPickerLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.PickVisualMedia(),
-        onResult = { uri -> selectedImageUri = uri }
+        onResult = { uri -> if (uri != null) frontImageUri = uri }
+    )
+    
+    val backPickerLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.PickVisualMedia(),
+        onResult = { uri -> if (uri != null) backImageUri = uri }
     )
 
     Column(
@@ -120,70 +132,72 @@ fun KycUploadScreen(customerId: String, tenantSchema: String, viewModel: KycView
     ) {
         Text("KYC Verification", style = MaterialTheme.typography.headlineMedium)
         Spacer(modifier = Modifier.height(24.dp))
-
-        // ID Document Preview
-        if (selectedImageUri != null) {
-            AsyncImage(
-                model = selectedImageUri,
-                contentDescription = "Selected ID Card",
-                modifier = Modifier.size(200.dp)
-            )
-        } else {
-            OutlinedCard(modifier = Modifier.size(200.dp)) {
-                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                    Text("No image selected")
+        
+        Text("Upload Front of ID", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        OutlinedCard(
+            modifier = Modifier.size(width = 320.dp, height = 200.dp).clickable {
+                frontPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+            }
+        ) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                if (frontImageUri != null) {
+                    AsyncImage(
+                        model = frontImageUri,
+                        contentDescription = "Front of ID",
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
+                    Text("Tap to Select Front Image", color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
-
-        Button(onClick = {
-            photoPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-        }) {
-            Text("Select ID Card Image")
+        Spacer(modifier = Modifier.height(32.dp))
+        
+        Text("Upload Back of ID", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+        Spacer(modifier = Modifier.height(8.dp))
+        
+        OutlinedCard(
+            modifier = Modifier.size(width = 320.dp, height = 200.dp).clickable {
+                backPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+            }
+        ) {
+            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                if (backImageUri != null) {
+                    AsyncImage(
+                        model = backImageUri,
+                        contentDescription = "Back of ID",
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
+                    Text("Tap to Select Back Image", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // Added Input Fields
-        OutlinedTextField(
-            value = idType,
-            onValueChange = { idType = it },
-            label = { Text("ID Type (e.g. Passport)") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        OutlinedTextField(
-            value = idNumber,
-            onValueChange = { idNumber = it },
-            label = { Text("ID Number") },
-            modifier = Modifier.fillMaxWidth()
-        )
-
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(40.dp))
 
         Button(
             onClick = {
-                selectedImageUri?.let {
-                    viewModel.uploadId(context, it, customerId, tenantSchema, idType, idNumber)
+                if (frontImageUri != null && backImageUri != null) {
+                    viewModel.uploadId(context, frontImageUri!!, backImageUri!!, customerId, tenantSchema)
                 }
             },
-            enabled = selectedImageUri != null && idType.isNotBlank() && idNumber.isNotBlank() && !viewModel.isUploading,
-            modifier = Modifier.fillMaxWidth()
+            enabled = frontImageUri != null && backImageUri != null && !viewModel.isUploading,
+            modifier = Modifier.fillMaxWidth().height(56.dp)
         ) {
             if (viewModel.isUploading) {
                 CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.onPrimary)
             } else {
-                Text("Submit KYC")
+                Text("Submit Verified Documents")
             }
         }
 
         viewModel.uploadStatus?.let {
             Spacer(modifier = Modifier.height(16.dp))
-            Text(it, color = if (it.contains("Error")) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary)
+            Text(it, color = if (it.contains("Error")) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.primary, style = MaterialTheme.typography.bodyLarge)
         }
     }
 }

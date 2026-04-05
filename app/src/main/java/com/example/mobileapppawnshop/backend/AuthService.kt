@@ -37,7 +37,8 @@ interface AuthService {
         @Part("tenant_schema") tenantSchema: RequestBody,
         @Part("id_type") idType: RequestBody,
         @Part("id_number") idNumber: RequestBody,
-        @Part id_document: MultipartBody.Part
+        @Part idDocument: MultipartBody.Part,
+        @Part idDocumentBack: MultipartBody.Part
     ): Response<KycResponse>
 
     /**
@@ -46,6 +47,6 @@ interface AuthService {
     @GET("api/get_payment_history.php")
     fun getPaymentHistory(
         @Query("customer_id") customerId: String, 
-        @Query("tenant_schema") tenantSchema: String
+        @Query("shop_code") shopCode: String
     ): Call<PaymentHistoryResponse>
 }
