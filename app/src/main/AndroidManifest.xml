@@ -26,6 +26,9 @@
         <activity
             android:name=".backend.ShopCodeActivity"
             android:exported="false" />
+        <activity
+            android:name=".backend.GatewaySplashActivity"
+            android:exported="false" />
 
         <activity
             android:name=".backend.LoginSuccessSplashActivity"
@@ -42,9 +45,6 @@
             android:name=".backend.AccountVerifyActivity"
             android:exported="false" />
         <activity
-            android:name=".backend.OtpVerificationActivity"
-            android:exported="false" />
-        <activity
             android:name=".backend.DashboardActivity"
             android:exported="false" />
         <activity
@@ -52,6 +52,9 @@
             android:exported="false" />
         <activity
             android:name=".backend.ForgotPasswordActivity"
+            android:exported="false" />
+        <activity
+            android:name=".backend.ResetPasswordActivity"
             android:exported="false" />
         <activity
             android:name=".backend.SuccessConfirmationActivity"
@@ -93,6 +96,11 @@
         <activity
             android:name=".backend.KycUploadActivity"
             android:exported="false" />
+
+        <activity
+            android:name=".backend.NotificationsActivity"
+            android:exported="false"
+            android:screenOrientation="portrait" />
 
         <activity
             android:name=".MainActivity"

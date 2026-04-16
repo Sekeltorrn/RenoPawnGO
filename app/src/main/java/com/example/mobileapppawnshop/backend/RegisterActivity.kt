@@ -84,32 +84,20 @@ class RegisterActivity : AppCompatActivity() {
         }
 
         // --- UPDATED NAVIGATION LOGIC ---
-        viewModel.registerResult.observe(this) { success ->
+        viewModel.registerResult.observe(this) { resultPair ->
+            val success = resultPair.first
             if (success) {
-                // SUCCESS: Grab the email they just typed
-                val emailStr = etEmail.text.toString()
-
-                /* TODO: AUTH BYPASS ACTIVE. Uncomment this block when Email OTP is re-enabled.
-                Toast.makeText(this, "Registration successful! Please verify your email.", Toast.LENGTH_SHORT).show()
-
-                // Open the Verification Screen and hand it the email
+                // ROUTE TO OTP SCREEN
                 val intent = Intent(this, AccountVerifyActivity::class.java).apply {
-                    putExtra("email", emailStr)
+                    putExtra("email", etEmail.text.toString())
+                    putExtra("full_name", etFullName.text.toString())
+                    putExtra("schema_name", schemaName) 
+                    putExtra("is_from_login", false) 
                 }
                 startActivity(intent)
-                finish() // Close the register screen so they can't go "back" to it
-                */
-
-                // TEMPORARY BYPASS NAVIGATION
-                Toast.makeText(this, "Registration successful!", Toast.LENGTH_SHORT).show()
-                val intent = Intent(this, SuccessConfirmationActivity::class.java).apply {
-                    putExtra("message", "Registration Successful!")
-                    putExtra("sub_message", "Your account is now pending admin approval. Please wait for the shop to verify your details.")
-                }
-                startActivity(intent)
-                finish()
+                finish() 
             } else {
-                Toast.makeText(this, "Registration failed or Email already exists", Toast.LENGTH_LONG).show()
+                Toast.makeText(this, resultPair.second, Toast.LENGTH_LONG).show()
             }
         }
     }

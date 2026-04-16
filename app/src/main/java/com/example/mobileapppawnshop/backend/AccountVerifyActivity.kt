@@ -19,6 +19,7 @@ class AccountVerifyActivity : AppCompatActivity() {
 
     private lateinit var viewModel: AuthViewModel
     private lateinit var sessionManager: SessionManager
+    private var resendTimer: android.os.CountDownTimer? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,7 +35,7 @@ class AccountVerifyActivity : AppCompatActivity() {
         val fullName = intent.getStringExtra("full_name") ?: "Customer"
         val customerId = intent.getStringExtra("customer_id") ?: ""
         val isFromLogin = intent.getBooleanExtra("is_from_login", false)
-        val shopCode = intent.getStringExtra("shop_code") ?: sessionManager.getShopCode() ?: ""
+        val schemaName = intent.getStringExtra("schema_name") ?: sessionManager.getSchemaName() ?: ""
 
         tvEmailInfo.text = "Enter the 6-digit code sent to \n$email"
 
@@ -50,16 +51,12 @@ class AccountVerifyActivity : AppCompatActivity() {
 
         btnVerify.setOnClickListener {
             val code = "${otp1.text}${otp2.text}${otp3.text}${otp4.text}${otp5.text}${otp6.text}"
-
             if (code.length == 6) {
-                /**
-                 * CRITICAL FIX:
-                 * For new registrations, type MUST be "signup" so verify.php
-                 * triggers the SQL INSERT into your customers table.
-                 */
-                val verificationType = if (isFromLogin) "magiclink" else "signup"
-
-                viewModel.verifyCode(email, code, verificationType, shopCode)
+                if (isFromLogin) {
+                    viewModel.verifyLoginOtp(email, code, schemaName)
+                } else {
+                    viewModel.verifyRegisterOtp(email, code, schemaName)
+                }
             } else {
                 Toast.makeText(this, "Please enter 6-digit code", Toast.LENGTH_SHORT).show()
             }
@@ -69,34 +66,106 @@ class AccountVerifyActivity : AppCompatActivity() {
             finish()
         }
 
-        // --- NAVIGATION LOGIC (The Traffic Cop) ---
-        viewModel.verificationResult.observe(this) { success ->
-            if (success) {
-                if (isFromLogin) {
-                    // Path A: 2FA Login Success
-                    // --- THE FIX: Save the FULL session including the Customer ID ---
-                    sessionManager.saveUserLoginFull(email, fullName, customerId)
-                    
-                    // FEEDBACK: Show success toast
-                    Toast.makeText(this, "Login Verified!", Toast.LENGTH_SHORT).show()
-                    
-                    // ANIMATION: Go to Splash screen for the "Animated Dashboard" entry
-                    val intent = Intent(this, LoginSuccessSplashActivity::class.java)
-                    startActivity(intent)
-                    finish()
-                } else {
-                    /**
-                     * Path B: NEW REGISTRATION SUCCESS
-                     */
-                    val intent = Intent(this, SuccessConfirmationActivity::class.java)
-                    intent.putExtra("message", "Registration Successful!")
-                    intent.putExtra("sub_message", "Your account is now pending admin approval. Please wait for the shop to verify your details.")
-                    startActivity(intent)
-                    finish()
+        // OBSERVER A: Register OTP
+        viewModel.verifyRegisterResult.observe(this) { resultPair ->
+            if (resultPair.first) {
+                // Registration Verified! Route to SuccessConfirmationActivity
+                val intent = Intent(this, SuccessConfirmationActivity::class.java).apply {
+                    putExtra("message", "Email Verified!")
+                    putExtra("sub_message", "Your account is active. Please log in with your credentials.")
                 }
+                startActivity(intent)
+                finish()
             } else {
-                Toast.makeText(this, "Invalid or expired code. Please try again.", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, resultPair.second, Toast.LENGTH_SHORT).show()
             }
         }
+
+        // OBSERVER B: Login OTP
+        viewModel.verifyLoginResult.observe(this) { resultPair ->
+            val user = resultPair.first
+            if (user != null) {
+                // SECURE LOGIN: Save session data now!
+                sessionManager.saveUserLoginFull(user.email, user.fullName, user.id)
+                sessionManager.saveKycStatus(user.kycStatus)
+                
+                // Route to animated Splash Screen
+                val intent = Intent(this, LoginSuccessSplashActivity::class.java)
+                startActivity(intent)
+                finish()
+            } else {
+                Toast.makeText(this, resultPair.second, Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        // Dynamically update UI based on flow
+        if (isFromLogin) {
+            btnVerify.text = "Verify & Login"
+            tvEmailInfo.text = "Enter the 6-digit login code sent to \n$email"
+        } else {
+            btnVerify.text = "Verify & Create Account"
+            tvEmailInfo.text = "Enter the 6-digit registration code sent to \n$email"
+        }
+
+        val tvResend = findViewById<TextView>(R.id.tvResendCode)
+
+        // 1. START THE TIMER THE MOMENT THE SCREEN OPENS
+        startResendTimer(tvResend)
+
+        // 2. SETUP THE CLICK LISTENER
+        tvResend.setOnClickListener {
+            // Lock UI while talking to the server
+            tvResend.isEnabled = false
+            tvResend.isClickable = false
+            tvResend.text = "Sending..."
+            tvResend.alpha = 0.5f 
+            
+            val type = if (isFromLogin) "login" else "signup"
+            viewModel.resendOtp(email, type)
+        }
+
+        // 3. HANDLE SERVER RESPONSE
+        viewModel.resendResult.observe(this) { result ->
+            if (result.first) {
+                // Success: Restart the 40s countdown
+                startResendTimer(tvResend)
+            } else {
+                // Fail: Unlock so they can try again instantly
+                tvResend.isEnabled = true
+                tvResend.isClickable = true
+                tvResend.text = "Resend Verification Code"
+                tvResend.alpha = 1.0f
+                Toast.makeText(this, result.second, Toast.LENGTH_LONG).show()
+            }
+        }
+    }
+
+    private fun startResendTimer(tvResend: TextView) {
+        // LOCK THE BUTTON DOWN
+        tvResend.isEnabled = false
+        tvResend.isClickable = false
+        tvResend.alpha = 0.5f 
+
+        resendTimer?.cancel() 
+        // INCREASED TO 60 SECONDS TO SYNC WITH SERVER RATE LIMITS
+        resendTimer = object : android.os.CountDownTimer(60000, 1000) {
+            override fun onTick(millisUntilFinished: Long) {
+                val seconds = millisUntilFinished / 1000
+                tvResend.text = "Resend code in ${seconds}s"
+            }
+
+            override fun onFinish() {
+                // UNLOCK THE BUTTON
+                tvResend.isEnabled = true
+                tvResend.isClickable = true
+                tvResend.text = "Resend Verification Code"
+                tvResend.alpha = 1.0f 
+            }
+        }.start()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        resendTimer?.cancel()
     }
 }

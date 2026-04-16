@@ -3,21 +3,20 @@ package com.example.mobileapppawnshop.data.model
 import com.google.gson.annotations.SerializedName
 
 data class TicketResponse(
-    val success: Boolean,
-    val tickets: List<PawnTicket>?,
-    val message: String?
+    @SerializedName("success") val success: Boolean,
+    @SerializedName("tickets") val tickets: List<PawnTicket>?,
+    @SerializedName("message") val message: String?
 )
 
 data class PawnTicket(
-    val pawn_ticket_no: Int,
-    val principal_amount: Double,
-    val due_date: String,
-    val maturity_date: String?,
-    val expiration_date: String?,
-    val status: String,
-    val inventory: InventoryItem?
+    @SerializedName("pawn_ticket_no") val pawnTicketNo: Int,
+    @SerializedName("reference_no") val referenceNo: String?,
+    @SerializedName("principal_amount") val principalAmount: Double,
+    @SerializedName("due_date") val dueDate: String?,
+    @SerializedName("status") val status: String?,
+    @SerializedName("inventory") val inventory: Inventory?
 )
 
-data class InventoryItem(
-    val item_name: String
+data class Inventory(
+    @SerializedName("item_name") val itemName: String?
 )

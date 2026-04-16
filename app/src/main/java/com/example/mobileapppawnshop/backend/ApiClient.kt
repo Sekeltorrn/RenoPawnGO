@@ -4,8 +4,9 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 object ApiClient {
-    // 🔴 Pointing Retrofit to your live Render server!
     private const val BASE_URL = "https://pawnereno.onrender.com/"
+    // DEV URL (Laragon): 
+    // private const val BASE_URL = "http://10.0.2.2/pawnshop-saas-v1/"
 
     private var retrofit: Retrofit? = null
 

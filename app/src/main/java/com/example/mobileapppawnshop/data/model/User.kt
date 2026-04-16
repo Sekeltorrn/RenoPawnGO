@@ -7,5 +7,6 @@ data class User(
     val id: String = "",
     val fullName: String = "",
     val email: String = "",
-    val phone: String = ""
+    val phone: String = "",
+    val kycStatus: String = "unverified"
 )

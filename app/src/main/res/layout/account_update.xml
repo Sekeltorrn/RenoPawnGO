@@ -105,161 +105,65 @@
                 android:textColor="#434653"
                 android:textSize="14sp" />
 
-            <!-- Profile Status Card -->
+            <!-- Dynamic Alert Container -->
             <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardStatus"
+                android:id="@+id/cardDynamicAlert"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
-                android:clickable="true"
-                android:focusable="true"
-                app:cardBackgroundColor="@android:color/white"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="2dp">
+                android:visibility="gone"
+                app:cardCornerRadius="12dp"
+                app:cardElevation="0dp"
+                app:strokeWidth="1dp">
 
-                <LinearLayout
+                <RelativeLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:orientation="vertical"
-                    android:padding="24dp">
+                    android:padding="16dp">
 
-                    <RelativeLayout
+                    <ImageView
+                        android:id="@+id/ivAlertIcon"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_alignParentStart="true"
+                        android:layout_centerVertical="true"
+                        android:src="@android:drawable/ic_dialog_info" />
+
+                    <LinearLayout
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
-                        android:layout_marginBottom="16dp">
+                        android:layout_toEndOf="@id/ivAlertIcon"
+                        android:layout_toStartOf="@+id/btnAlertClose"
+                        android:layout_marginStart="12dp"
+                        android:layout_centerVertical="true"
+                        android:orientation="vertical">
 
                         <TextView
+                            android:id="@+id/tvAlertTitle"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:fontFamily="sans-serif-medium"
-                            android:text="Profile Status"
-                            android:textColor="#191c1e"
-                            android:textSize="18sp" />
+                            android:textSize="14sp"
+                            android:textStyle="bold" />
 
                         <TextView
-                            android:id="@+id/tvStatusComplete"
+                            android:id="@+id/tvAlertMessage"
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
-                            android:layout_alignParentEnd="true"
-                            android:background="#d5e3fc"
-                            android:paddingHorizontal="12dp"
-                            android:paddingVertical="4dp"
-                            android:text="65% COMPLETE"
-                            android:textColor="#3a485b"
-                            android:textSize="10sp"
-                            android:textStyle="bold" />
-                    </RelativeLayout>
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:layout_marginBottom="12dp"
-                        android:orientation="horizontal">
-                        <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:src="@android:drawable/checkbox_on_background"
-                            app:tint="#16a34a" />
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="12dp"
-                            android:orientation="vertical">
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Account Registration"
-                                android:textColor="#191c1e"
-                                android:textSize="12sp"
-                                android:textStyle="bold" />
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="COMPLETE"
-                                android:textColor="#16a34a"
-                                android:textSize="10sp"
-                                android:textStyle="bold" />
-                        </LinearLayout>
+                            android:layout_marginTop="2dp"
+                            android:textSize="12sp" />
                     </LinearLayout>
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:layout_marginBottom="12dp"
-                        android:orientation="horizontal">
-                        <ImageView
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:src="@android:drawable/checkbox_on_background"
-                            app:tint="#16a34a" />
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="12dp"
-                            android:orientation="vertical">
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Personal Details"
-                                android:textColor="#191c1e"
-                                android:textSize="12sp"
-                                android:textStyle="bold" />
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="COMPLETE"
-                                android:textColor="#16a34a"
-                                android:textSize="10sp"
-                                android:textStyle="bold" />
-                        </LinearLayout>
-                    </LinearLayout>
+                    <ImageButton
+                        android:id="@+id/btnAlertClose"
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:layout_alignParentEnd="true"
+                        android:layout_centerVertical="true"
+                        android:background="?attr/selectableItemBackgroundBorderless"
+                        android:src="@android:drawable/ic_menu_close_clear_cancel" />
 
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:gravity="center_vertical"
-                        android:orientation="horizontal">
-                        <ImageView
-                            android:id="@+id/ivIdCheck"
-                            android:layout_width="20dp"
-                            android:layout_height="20dp"
-                            android:src="@android:drawable/checkbox_off_background"
-                            app:tint="#94a3b8" />
-                        <LinearLayout
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_marginStart="12dp"
-                            android:orientation="vertical">
-                            <TextView
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="Government Issued ID"
-                                android:textColor="#191c1e"
-                                android:textSize="12sp"
-                                android:textStyle="bold" />
-                            <TextView
-                                android:id="@+id/tvIdStatus"
-                                android:layout_width="wrap_content"
-                                android:layout_height="wrap_content"
-                                android:text="PENDING"
-                                android:textColor="#64748b"
-                                android:textSize="10sp"
-                                android:textStyle="bold" />
-                        </LinearLayout>
-                    </LinearLayout>
-
-                    <com.google.android.material.progressindicator.LinearProgressIndicator
-                        android:id="@+id/progressIndicator"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="24dp"
-                        android:progress="65"
-                        app:trackColor="#eceef0"
-                        app:indicatorColor="#00327d" />
-
-                </LinearLayout>
+                </RelativeLayout>
             </com.google.android.material.card.MaterialCardView>
 
             <LinearLayout
@@ -307,49 +211,207 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="16dp">
+
                             <LinearLayout
+                                android:id="@+id/containerEmail"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_toStartOf="@id/layoutEditControlsEmail"
+                                android:orientation="vertical"
+                                android:paddingVertical="4dp">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:letterSpacing="0.1"
+                                    android:text="EMAIL ADDRESS"
+                                    android:textColor="#737784"
+                                    android:textSize="10sp"
+                                    android:textStyle="bold" />
+
+                                <EditText
+                                    android:id="@+id/etEmail"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="4dp"
+                                    android:background="@android:color/transparent"
+                                    android:text="example@mail.com"
+                                    android:textColor="#191c1e"
+                                    android:textSize="14sp"
+                                    android:textStyle="bold"
+                                    android:enabled="false"/>
+
+                                <LinearLayout
+                                    android:id="@+id/layoutOriginalEmail"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="vertical"
+                                    android:visibility="gone"
+                                    android:background="#f8fafc"
+                                    android:padding="8dp"
+                                    android:layout_marginTop="4dp">
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="ORIGINAL EMAIL"
+                                        android:textColor="#64748b"
+                                        android:textSize="9sp"
+                                        android:textStyle="bold" />
+                                    <TextView
+                                        android:id="@+id/tvOriginalEmailValue"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="---"
+                                        android:textColor="#64748b"
+                                        android:textSize="12sp" />
+                                </LinearLayout>
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:id="@+id/layoutEditControlsEmail"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:orientation="vertical"
-                                android:layout_alignParentStart="true"
-                                android:layout_toStartOf="@id/btnEditEmail">
-                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="EMAIL ADDRESS" android:textColor="#737784" android:textSize="10sp" android:textStyle="bold" android:letterSpacing="0.1" />
-                                <TextView android:id="@+id/tvEmail" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="example@mail.com" android:textColor="#191c1e" android:textSize="14sp" android:textStyle="bold" android:layout_marginTop="4dp" android:fontStyle="italic" />
-                            </LinearLayout>
-                            <ImageButton
-                                android:id="@+id/btnEditEmail"
-                                android:layout_width="32dp"
-                                android:layout_height="32dp"
                                 android:layout_alignParentEnd="true"
                                 android:layout_centerVertical="true"
-                                android:background="?attr/selectableItemBackgroundBorderless"
-                                android:src="@android:drawable/ic_menu_edit"
-                                app:tint="#00327d" />
+                                android:orientation="horizontal">
+
+                                <ImageButton
+                                    android:id="@+id/btnEditEmail"
+                                    android:layout_width="32dp"
+                                    android:layout_height="32dp"
+                                    android:background="?attr/selectableItemBackgroundBorderless"
+                                    android:src="@android:drawable/ic_menu_edit"
+                                    app:tint="#00327d" />
+
+                                <LinearLayout
+                                    android:id="@+id/layoutConfirmEmail"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="horizontal"
+                                    android:visibility="gone">
+
+                                    <ImageButton
+                                        android:id="@+id/btnApproveEmail"
+                                        android:layout_width="32dp"
+                                        android:layout_height="32dp"
+                                        android:background="?attr/selectableItemBackgroundBorderless"
+                                        android:src="@android:drawable/checkbox_on_background"
+                                        app:tint="#16a34a" />
+
+                                    <ImageButton
+                                        android:id="@+id/btnCancelEmail"
+                                        android:layout_width="32dp"
+                                        android:layout_height="32dp"
+                                        android:background="?attr/selectableItemBackgroundBorderless"
+                                        android:src="@android:drawable/ic_menu_close_clear_cancel"
+                                        app:tint="#ba1a1a" />
+                                </LinearLayout>
+                            </LinearLayout>
                         </RelativeLayout>
 
                         <RelativeLayout
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="16dp">
+
                             <LinearLayout
+                                android:id="@+id/containerMobile"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_toStartOf="@id/layoutEditControlsMobile"
+                                android:orientation="vertical"
+                                android:paddingVertical="4dp">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:letterSpacing="0.1"
+                                    android:text="MOBILE NUMBER"
+                                    android:textColor="#737784"
+                                    android:textSize="10sp"
+                                    android:textStyle="bold" />
+
+                                <EditText
+                                    android:id="@+id/etMobile"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="4dp"
+                                    android:background="@android:color/transparent"
+                                    android:text="+00 000 000 0000"
+                                    android:textColor="#191c1e"
+                                    android:textSize="14sp"
+                                    android:textStyle="bold"
+                                    android:enabled="false"/>
+
+                                <LinearLayout
+                                    android:id="@+id/layoutOriginalMobile"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="vertical"
+                                    android:visibility="gone"
+                                    android:background="#f8fafc"
+                                    android:padding="8dp"
+                                    android:layout_marginTop="4dp">
+                                    <TextView
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="ORIGINAL MOBILE"
+                                        android:textColor="#64748b"
+                                        android:textSize="9sp"
+                                        android:textStyle="bold" />
+                                    <TextView
+                                        android:id="@+id/tvOriginalMobileValue"
+                                        android:layout_width="wrap_content"
+                                        android:layout_height="wrap_content"
+                                        android:text="---"
+                                        android:textColor="#64748b"
+                                        android:textSize="12sp" />
+                                </LinearLayout>
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:id="@+id/layoutEditControlsMobile"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:orientation="vertical"
-                                android:layout_alignParentStart="true"
-                                android:layout_toStartOf="@id/btnEditMobile">
-                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="MOBILE NUMBER" android:textColor="#737784" android:textSize="10sp" android:textStyle="bold" android:letterSpacing="0.1" />
-                                <TextView android:id="@+id/tvMobile" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="+00 000 000 0000" android:textColor="#191c1e" android:textSize="14sp" android:textStyle="bold" android:layout_marginTop="4dp" />
-                            </LinearLayout>
-                            <ImageButton
-                                android:id="@+id/btnEditMobile"
-                                android:layout_width="32dp"
-                                android:layout_height="32dp"
                                 android:layout_alignParentEnd="true"
                                 android:layout_centerVertical="true"
-                                android:background="?attr/selectableItemBackgroundBorderless"
-                                android:src="@android:drawable/ic_menu_edit"
-                                app:tint="#00327d" />
+                                android:orientation="horizontal">
+
+                                <ImageButton
+                                    android:id="@+id/btnEditMobile"
+                                    android:layout_width="32dp"
+                                    android:layout_height="32dp"
+                                    android:background="?attr/selectableItemBackgroundBorderless"
+                                    android:src="@android:drawable/ic_menu_edit"
+                                    app:tint="#00327d" />
+
+                                <LinearLayout
+                                    android:id="@+id/layoutConfirmMobile"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="horizontal"
+                                    android:visibility="gone">
+
+                                    <ImageButton
+                                        android:id="@+id/btnApproveMobile"
+                                        android:layout_width="32dp"
+                                        android:layout_height="32dp"
+                                        android:background="?attr/selectableItemBackgroundBorderless"
+                                        android:src="@android:drawable/checkbox_on_background"
+                                        app:tint="#16a34a" />
+
+                                    <ImageButton
+                                        android:id="@+id/btnCancelMobile"
+                                        android:layout_width="32dp"
+                                        android:layout_height="32dp"
+                                        android:background="?attr/selectableItemBackgroundBorderless"
+                                        android:src="@android:drawable/ic_menu_close_clear_cancel"
+                                        app:tint="#ba1a1a" />
+                                </LinearLayout>
+                            </LinearLayout>
                         </RelativeLayout>
+
+
 
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
@@ -386,8 +448,28 @@
 
                         <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#eceef0" android:layout_marginTop="16dp" />
 
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="FULL NAME" android:textColor="#737784" android:textSize="10sp" android:textStyle="bold" android:layout_marginTop="16dp" android:letterSpacing="0.1" />
-                        <TextView android:id="@+id/tvFullName" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Not set" android:textColor="#191c1e" android:textSize="14sp" android:textStyle="bold" android:layout_marginTop="4dp" />
+                        <TextView
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginTop="12dp"
+                            android:text="Contact staff to update legal identity details."
+                            android:textColor="#64748b"
+                            android:textSize="12sp"
+                            android:textStyle="italic"
+                            android:gravity="center"
+                            android:background="#f8fafc"
+                            android:paddingVertical="8dp" />
+
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="FIRST NAME" android:textColor="#737784" android:textSize="10sp" android:textStyle="bold" android:layout_marginTop="16dp" android:letterSpacing="0.1" />
+                        <EditText android:id="@+id/etFirstName" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="First Name" android:textSize="14sp" android:textStyle="bold" android:background="@android:color/transparent" android:layout_marginTop="4dp" android:enabled="true" android:focusable="false" android:longClickable="false" android:textColor="#191c1e" />
+
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="MIDDLE NAME" android:textColor="#737784" android:textSize="10sp" android:textStyle="bold" android:layout_marginTop="12dp" android:letterSpacing="0.1" />
+                        <EditText android:id="@+id/etMiddleName" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="---" android:textSize="14sp" android:textStyle="bold" android:background="@android:color/transparent" android:layout_marginTop="4dp" android:enabled="true" android:focusable="false" android:longClickable="false" android:textColor="#191c1e" />
+
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="LAST NAME" android:textColor="#737784" android:textSize="10sp" android:textStyle="bold" android:layout_marginTop="12dp" android:letterSpacing="0.1" />
+                        <EditText android:id="@+id/etLastName" android:layout_width="match_parent" android:layout_height="wrap_content" android:hint="Last Name" android:textSize="14sp" android:textStyle="bold" android:background="@android:color/transparent" android:layout_marginTop="4dp" android:enabled="true" android:focusable="false" android:longClickable="false" android:textColor="#191c1e" />
+
+                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:id="@+id/tvFullName" android:visibility="gone" />
 
                         <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="DATE OF BIRTH" android:textColor="#737784" android:textSize="10sp" android:textStyle="bold" android:layout_marginTop="16dp" android:letterSpacing="0.1" />
                         <TextView android:id="@+id/tvDOB" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="--/--/----" android:textColor="#191c1e" android:textSize="14sp" android:textStyle="bold" android:layout_marginTop="4dp" />
@@ -396,24 +478,79 @@
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             android:layout_marginTop="16dp">
+
                             <LinearLayout
+                                android:id="@+id/containerAddress"
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:layout_toStartOf="@id/layoutEditControlsAddress"
+                                android:orientation="vertical"
+                                android:paddingVertical="4dp">
+
+                                <TextView
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:letterSpacing="0.1"
+                                    android:text="HOME ADDRESS"
+                                    android:textColor="#737784"
+                                    android:textSize="10sp"
+                                    android:textStyle="bold" />
+
+                                <EditText
+                                    android:id="@+id/etAddress"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="wrap_content"
+                                    android:layout_marginTop="4dp"
+                                    android:background="@android:color/transparent"
+                                    android:enabled="true"
+                                    android:focusable="false"
+                                    android:hint="No address provided"
+                                    android:longClickable="false"
+                                    android:textColor="#191c1e"
+                                    android:textSize="14sp"
+                                    android:textStyle="bold" />
+                            </LinearLayout>
+
+                            <LinearLayout
+                                android:id="@+id/layoutEditControlsAddress"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
-                                android:orientation="vertical"
-                                android:layout_alignParentStart="true"
-                                android:layout_toStartOf="@id/btnEditAddress">
-                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="HOME ADDRESS" android:textColor="#737784" android:textSize="10sp" android:textStyle="bold" android:letterSpacing="0.1" />
-                                <TextView android:id="@+id/tvAddress" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="No address provided" android:textColor="#191c1e" android:textSize="14sp" android:textStyle="bold" android:layout_marginTop="4dp" android:fontStyle="italic" />
-                            </LinearLayout>
-                            <ImageButton
-                                android:id="@+id/btnEditAddress"
-                                android:layout_width="32dp"
-                                android:layout_height="32dp"
                                 android:layout_alignParentEnd="true"
                                 android:layout_centerVertical="true"
-                                android:background="?attr/selectableItemBackgroundBorderless"
-                                android:src="@android:drawable/ic_menu_edit"
-                                app:tint="#00327d" />
+                                android:orientation="horizontal">
+
+                                <ImageButton
+                                    android:id="@+id/btnEditAddress"
+                                    android:layout_width="32dp"
+                                    android:layout_height="32dp"
+                                    android:background="?attr/selectableItemBackgroundBorderless"
+                                    android:src="@android:drawable/ic_menu_edit"
+                                    app:tint="#00327d" />
+
+                                <LinearLayout
+                                    android:id="@+id/layoutConfirmAddress"
+                                    android:layout_width="wrap_content"
+                                    android:layout_height="wrap_content"
+                                    android:orientation="horizontal"
+                                    android:visibility="gone">
+
+                                    <ImageButton
+                                        android:id="@+id/btnApproveAddress"
+                                        android:layout_width="32dp"
+                                        android:layout_height="32dp"
+                                        android:background="?attr/selectableItemBackgroundBorderless"
+                                        android:src="@android:drawable/checkbox_on_background"
+                                        app:tint="#16a34a" />
+
+                                    <ImageButton
+                                        android:id="@+id/btnCancelAddress"
+                                        android:layout_width="32dp"
+                                        android:layout_height="32dp"
+                                        android:background="?attr/selectableItemBackgroundBorderless"
+                                        android:src="@android:drawable/ic_menu_close_clear_cancel"
+                                        app:tint="#ba1a1a" />
+                                </LinearLayout>
+                            </LinearLayout>
                         </RelativeLayout>
 
                     </LinearLayout>
@@ -597,7 +734,19 @@
                             android:paddingVertical="16dp"
                             android:visibility="gone">
 
+                            <!-- Front ID Display -->
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="Front ID Document"
+                                android:textSize="12sp"
+                                android:textColor="#64748b"
+                                android:textAllCaps="true"
+                                android:textStyle="bold"
+                                android:layout_marginBottom="8dp" />
+
                             <com.google.android.material.card.MaterialCardView
+                                android:id="@+id/cardVerifiedIdFront"
                                 android:layout_width="match_parent"
                                 android:layout_height="180dp"
                                 android:layout_marginBottom="16dp"
@@ -606,10 +755,39 @@
                                 app:strokeColor="#f59e0b"
                                 app:strokeWidth="2dp">
                                 <ImageView
-                                    android:id="@+id/ivVerifiedIdPhoto"
+                                    android:id="@+id/ivVerifiedIdFront"
                                     android:layout_width="match_parent"
                                     android:layout_height="match_parent"
-                                    android:scaleType="centerCrop" />
+                                    android:scaleType="centerCrop"
+                                    android:src="@android:drawable/ic_menu_gallery" />
+                            </com.google.android.material.card.MaterialCardView>
+
+                            <!-- Back ID Display -->
+                            <TextView
+                                android:layout_width="match_parent"
+                                android:layout_height="wrap_content"
+                                android:text="Back ID Document"
+                                android:textSize="12sp"
+                                android:textColor="#64748b"
+                                android:textAllCaps="true"
+                                android:textStyle="bold"
+                                android:layout_marginBottom="8dp" />
+
+                            <com.google.android.material.card.MaterialCardView
+                                android:id="@+id/cardVerifiedIdBack"
+                                android:layout_width="match_parent"
+                                android:layout_height="180dp"
+                                android:layout_marginBottom="24dp"
+                                app:cardCornerRadius="12dp"
+                                app:cardElevation="0dp"
+                                app:strokeColor="#f59e0b"
+                                app:strokeWidth="2dp">
+                                <ImageView
+                                    android:id="@+id/ivVerifiedIdBack"
+                                    android:layout_width="match_parent"
+                                    android:layout_height="match_parent"
+                                    android:scaleType="centerCrop"
+                                    android:src="@android:drawable/ic_menu_gallery" />
                             </com.google.android.material.card.MaterialCardView>
 
                             <ImageView
@@ -618,6 +796,7 @@
                                 android:src="@android:drawable/ic_popup_sync"
                                 app:tint="#f59e0b" />
                             <TextView
+                                android:id="@+id/tvIdVerifiedMessage"
                                 android:layout_width="wrap_content"
                                 android:layout_height="wrap_content"
                                 android:layout_marginTop="12dp"
@@ -662,39 +841,32 @@
 
                         <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#eceef0" android:layout_marginTop="16dp" />
 
-                        <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="CURRENT PASSWORD" android:textColor="#737784" android:textSize="10sp" android:textStyle="bold" android:layout_marginTop="16dp" android:letterSpacing="0.1" />
-                        <RelativeLayout
+                        <LinearLayout
+                            android:id="@+id/layoutPasswordActions"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
-                            android:layout_marginTop="8dp"
-                            android:background="#f2f4f6"
-                            android:padding="12dp">
+                            android:orientation="vertical"
+                            android:layout_marginTop="16dp">
+
+                            <com.google.android.material.button.MaterialButton
+                                android:id="@+id/btnForgotPasswordInApp"
+                                android:layout_width="match_parent"
+                                android:layout_height="56dp"
+                                android:text="RESET PASSWORD VIA EMAIL"
+                                android:textStyle="bold"
+                                app:backgroundTint="#00327d"
+                                app:cornerRadius="12dp"
+                                app:icon="@android:drawable/ic_dialog_email" />
+
                             <TextView
-                                android:layout_width="wrap_content"
+                                android:layout_width="match_parent"
                                 android:layout_height="wrap_content"
-                                android:text="••••••••"
-                                android:textColor="#191c1e"
-                                android:textSize="18sp"
-                                android:letterSpacing="0.2" />
-                            <ImageView
-                                android:layout_width="20dp"
-                                android:layout_height="20dp"
-                                android:layout_alignParentEnd="true"
-                                android:layout_centerVertical="true"
-                                android:src="@android:drawable/ic_menu_view"
-                                app:tint="#64748b" />
-                        </RelativeLayout>
-
-                        <com.google.android.material.button.MaterialButton
-                            android:id="@+id/btnUpdatePassword"
-                            android:layout_width="match_parent"
-                            android:layout_height="56dp"
-                            android:layout_marginTop="24dp"
-                            android:text="UPDATE PASSWORD"
-                            android:textStyle="bold"
-                            app:backgroundTint="#00327d"
-                            app:cornerRadius="12dp" />
-
+                                android:text="For your security, a verification code will be sent to your registered email address."
+                                android:textAlignment="center"
+                                android:textColor="#64748b"
+                                android:textSize="12sp"
+                                android:layout_marginTop="8dp" />
+                        </LinearLayout>
                     </LinearLayout>
                 </com.google.android.material.card.MaterialCardView>
 

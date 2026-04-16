@@ -107,9 +107,7 @@ class PawnTicketActiveActivity : AppCompatActivity() {
             }
         }
 
-        findViewById<ImageButton>(R.id.btnLogout).setOnClickListener {
-            startActivity(Intent(this, LogoutActivity::class.java))
-        }
+        setupTopBar()
 
         // Initial Fetch
         updateUI(Tab.ACTIVE)
@@ -164,22 +162,22 @@ class PawnTicketActiveActivity : AppCompatActivity() {
     private fun fetchTicketsByStatus(status: String) {
         val sessionManager = SessionManager(this)
         val realCustomerId = sessionManager.getCustomerId() ?: ""
-        val realShopCode = sessionManager.getShopCode() ?: ""
+        val realTenantSchema = sessionManager.getTenantSchema() ?: ""
 
-        if (realCustomerId.isEmpty() || realShopCode.isEmpty()) {
+        if (realCustomerId.isEmpty() || realTenantSchema.isEmpty()) {
             Toast.makeText(this, "Session Error: Missing Data", Toast.LENGTH_SHORT).show()
             return
         }
 
-        android.util.Log.d("DEBUG_LOANS", "Fetching loans - Customer ID: $realCustomerId | Shop Code: $realShopCode | Status: $status")
+        android.util.Log.d("DEBUG_LOANS", "Fetching loans - Customer ID: $realCustomerId | Tenant Schema: $realTenantSchema | Status: $status")
 
-        ApiClient.apiService.getActiveTickets(realCustomerId, realShopCode, status).enqueue(object : Callback<TicketResponse> {
+        ApiClient.apiService.getActiveTickets(realCustomerId, realTenantSchema, status).enqueue(object : Callback<TicketResponse> {
             override fun onResponse(call: Call<TicketResponse>, response: Response<TicketResponse>) {
                 if (response.isSuccessful && response.body()?.success == true) {
                     ticketsList = response.body()?.tickets ?: emptyList()
                     
                     // NEW: Ensure tickets are properly sorted by Due Date before pushing to UI
-                    val sortedTickets = ticketsList.sortedBy { it.due_date }
+                    val sortedTickets = ticketsList.sortedBy { it.dueDate }
                     ticketAdapter.updateData(sortedTickets)
 
                     if (sortedTickets.isNotEmpty()) {
@@ -198,7 +196,7 @@ class PawnTicketActiveActivity : AppCompatActivity() {
             }
 
             override fun onFailure(call: Call<TicketResponse>, t: Throwable) {
-                Toast.makeText(this@PawnTicketActiveActivity, "Network Error.", Toast.LENGTH_LONG).show()
+                Toast.makeText(this@PawnTicketActiveActivity, "Error: ${t.message}", Toast.LENGTH_LONG).show()
             }
         })
     }
@@ -225,6 +223,17 @@ class PawnTicketActiveActivity : AppCompatActivity() {
                 infoTitle.text = "No Expired Tickets"
                 infoDescription.text = "Tickets that have passed the maturity and grace period will appear here."
             }
+        }
+    }
+    private fun setupTopBar() {
+        // Logout Button
+        findViewById<ImageButton>(R.id.btnLogout)?.setOnClickListener {
+            startActivity(Intent(this, LogoutActivity::class.java))
+        }
+        
+        // Notifications Button
+        findViewById<ImageButton>(R.id.btnNotifications)?.setOnClickListener {
+            startActivity(Intent(this, NotificationsActivity::class.java))
         }
     }
 }

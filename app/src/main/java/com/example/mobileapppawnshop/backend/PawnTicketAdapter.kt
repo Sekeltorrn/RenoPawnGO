@@ -26,14 +26,37 @@ class PawnTicketAdapter(private var tickets: List<PawnTicket>, private val isDas
     override fun onBindViewHolder(holder: TicketViewHolder, position: Int) {
         val ticket = tickets[position]
 
-        // Populate the UI text fields
-        holder.tvItemName.text = ticket.inventory?.item_name ?: "Vault Item"
-        holder.tvTicketNo.text = "Ticket No: PT-${ticket.pawn_ticket_no}"
-        holder.tvPrincipal.text = "₱${ticket.principal_amount}"
-        holder.tvDueDate.text = "Due: ${ticket.due_date}"
+        // 1. Fix Item Name: Handle empty strings, nulls, and blanks
+        val rawItemName = ticket.inventory?.itemName
+        val itemName = if (rawItemName.isNullOrBlank()) "Vault Item" else rawItemName
+        holder.tvItemName.text = itemName
 
+        // 2. Format Currency safely
+        val formattedPrincipal = try {
+            val currencyFormat = java.text.NumberFormat.getCurrencyInstance(java.util.Locale("en", "PH"))
+            currencyFormat.format(ticket.principalAmount)
+        } catch (e: Exception) {
+            "₱${ticket.principalAmount}"
+        }
+
+        // 3. Format Date safely
+        val formattedDate = try {
+            val inputFormat = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US)
+            val outputFormat = java.text.SimpleDateFormat("MMM dd, yyyy", java.util.Locale.US)
+            val date = inputFormat.parse(ticket.dueDate ?: "")
+            if (date != null) outputFormat.format(date) else "----"
+        } catch (e: Exception) {
+            ticket.dueDate ?: "----"
+        }
+
+        // Populate the UI text fields
+        holder.tvTicketNo.text = "Ticket No: ${ticket.referenceNo ?: "PT-"+ticket.pawnTicketNo}"
+        holder.tvPrincipal.text = formattedPrincipal
+        holder.tvDueDate.text = "Due: $formattedDate"
+
+        // 4. Fix Dashboard Mode: Use INVISIBLE to maintain layout structure or trust ConstraintLayout
         if (isDashboard) {
-            holder.tvPrincipal.visibility = View.GONE
+            holder.tvPrincipal.visibility = View.INVISIBLE
         } else {
             holder.tvPrincipal.visibility = View.VISIBLE
         }
@@ -42,10 +65,11 @@ class PawnTicketAdapter(private var tickets: List<PawnTicket>, private val isDas
         holder.itemView.setOnClickListener {
             val context = holder.itemView.context
             val intent = Intent(context, PawnTicketDetailActivity::class.java).apply {
-                putExtra("TICKET_NO", ticket.pawn_ticket_no.toString())
-                putExtra("PRINCIPAL", ticket.principal_amount.toString())
-                putExtra("ITEM_NAME", ticket.inventory?.item_name ?: "Vault Item")
-                putExtra("DUE_DATE", ticket.due_date)
+                putExtra("TICKET_NO", ticket.pawnTicketNo.toString())
+                putExtra("REF_NO", ticket.referenceNo ?: ticket.pawnTicketNo.toString())
+                putExtra("PRINCIPAL", ticket.principalAmount.toString())
+                putExtra("ITEM_NAME", itemName)
+                putExtra("DUE_DATE", ticket.dueDate)
                 putExtra("STATUS", ticket.status)
                 putExtra("LOAN_DATE", "") 
             }

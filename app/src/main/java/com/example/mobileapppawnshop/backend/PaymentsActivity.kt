@@ -28,6 +28,7 @@ import retrofit2.Response
 class PaymentsActivity : AppCompatActivity() {
 
     private lateinit var etAmount: EditText
+    private lateinit var btnProceed: MaterialButton
     private lateinit var spinnerTicketSelection: AutoCompleteTextView
     private lateinit var sessionManager: SessionManager
     private lateinit var historyAdapter: PaymentHistoryAdapter
@@ -35,6 +36,7 @@ class PaymentsActivity : AppCompatActivity() {
     private var activeTickets: List<PawnTicket> = emptyList()
     private var activeTicket: PawnTicket? = null 
     private var selectedPaymentType = "renewal" // 'renewal', 'principal', or 'redemption'
+    private var minPaymentRequired = 0.0 // Interest + Service Fee
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -42,6 +44,7 @@ class PaymentsActivity : AppCompatActivity() {
 
         sessionManager = SessionManager(this)
         etAmount = findViewById(R.id.etAmount)
+        btnProceed = findViewById(R.id.btnProceed)
         spinnerTicketSelection = findViewById(R.id.spinnerTicketSelection)
 
         // Setup Buttons
@@ -65,24 +68,93 @@ class PaymentsActivity : AppCompatActivity() {
             calculateAmount()
         }
 
-        // Handle Dropdown Selection
+        // Handle Dropdown Selection (Safely handles filtered search results)
         spinnerTicketSelection.setOnItemClickListener { parent, _, position, _ ->
-            activeTicket = activeTickets[position]
+            val selectedLabel = parent.getItemAtPosition(position) as String
+            
+            // Find the ticket that matches the exact string the user clicked
+            activeTicket = activeTickets.find { ticket -> 
+                val label = "${ticket.referenceNo ?: "PT-"+ticket.pawnTicketNo} - ${ticket.inventory?.itemName ?: "Item"}"
+                label == selectedLabel 
+            }
+            
             calculateAmount() 
         }
 
-        findViewById<MaterialButton>(R.id.btnProceed).setOnClickListener {
+        // Initialize Proceed Button State (Greyed out until ticket is selected)
+        btnProceed.isEnabled = false
+        btnProceed.alpha = 0.5f
+        
+        btnProceed.setOnClickListener {
             processPayment()
         }
         
-        findViewById<ImageButton>(R.id.btnLogout).setOnClickListener {
-            startActivity(Intent(this, LogoutActivity::class.java))
-        }
+        etAmount.addTextChangedListener(object : android.text.TextWatcher {
+            override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+            override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {}
+            override fun afterTextChanged(s: android.text.Editable?) {
+                validateAmount()
+            }
+        })
+        
+        setupTopBar()
 
         setupHistoryRecyclerView()
         setupBottomNav()
         fetchLiveTickets()
         fetchPaymentHistory()
+    }
+
+    private fun validateAmount() {
+        val amountStr = etAmount.text.toString()
+        val principal = activeTicket?.principalAmount ?: 0.0
+        val enteredAmount = amountStr.toDoubleOrNull() ?: 0.0
+
+        // 1. Instantly Update the Breakdown Total based on Payment Type
+        when (selectedPaymentType) {
+            "renewal" -> {
+                findViewById<TextView>(R.id.tvBreakdownPrincipal).text = "₱0.00"
+                findViewById<TextView>(R.id.tvBreakdownTotal).text = String.format("₱%.2f", minPaymentRequired)
+            }
+            "redemption" -> {
+                // UPDATE: Lock the breakdown principal to the exact principal, don't read the main box
+                findViewById<TextView>(R.id.tvBreakdownPrincipal).text = String.format("₱%.2f", principal)
+                val redemptionTotal = principal + minPaymentRequired
+                findViewById<TextView>(R.id.tvBreakdownTotal).text = String.format("₱%.2f", redemptionTotal)
+            }
+            "principal" -> {
+                // For partial, the main box shows the principal chunk you want to eliminate
+                findViewById<TextView>(R.id.tvBreakdownPrincipal).text = String.format("₱%.2f", enteredAmount)
+                val grandTotal = enteredAmount + minPaymentRequired
+                findViewById<TextView>(R.id.tvBreakdownTotal).text = String.format("₱%.2f", grandTotal)
+            }
+        }
+
+        // 2. Strict Validation Logic
+        if (selectedPaymentType == "principal") {
+            when {
+                enteredAmount <= 0 -> {
+                    etAmount.error = "Enter an amount greater than 0"
+                    btnProceed.isEnabled = false
+                    btnProceed.alpha = 0.5f
+                }
+                enteredAmount >= principal -> {
+                    etAmount.error = "To pay in full, please select Redemption"
+                    btnProceed.isEnabled = false
+                    btnProceed.alpha = 0.5f
+                }
+                else -> {
+                    etAmount.error = null
+                    btnProceed.isEnabled = true
+                    btnProceed.alpha = 1.0f
+                }
+            }
+        } else {
+            // Renewal and Redemption are automatically valid because the fields are locked
+            etAmount.error = null
+            btnProceed.isEnabled = true
+            btnProceed.alpha = 1.0f
+        }
     }
 
     private fun setupHistoryRecyclerView() {
@@ -101,33 +173,56 @@ class PaymentsActivity : AppCompatActivity() {
 
     private fun fetchLiveTickets() {
         val customerId = sessionManager.getCustomerId() ?: ""
-        val shopCode = sessionManager.getShopCode() ?: ""
+        val tenantSchema = sessionManager.getTenantSchema() ?: ""
 
-        if (customerId.isEmpty() || shopCode.isEmpty()) {
+        if (customerId.isEmpty() || tenantSchema.isEmpty()) {
             Toast.makeText(this, "Session Error. Please log in again.", Toast.LENGTH_SHORT).show()
             return
         }
 
         // Added "active" as the default status parameter to match AuthService updated definition
-        ApiClient.apiService.getActiveTickets(customerId, shopCode, "active").enqueue(object : Callback<TicketResponse> {
+        ApiClient.apiService.getActiveTickets(customerId, tenantSchema, "active").enqueue(object : Callback<TicketResponse> {
             override fun onResponse(call: Call<TicketResponse>, response: Response<TicketResponse>) {
                 val body = response.body()
                 if (response.isSuccessful && body != null && body.success && body.tickets != null) {
-                    activeTickets = body.tickets
+                    // Step 2: Only show active tickets
+                    activeTickets = body.tickets.filter { it.status?.lowercase() == "active" }
                     
-                    val ticketLabels = activeTickets.map { "PT-${it.pawn_ticket_no} - ${it.inventory?.item_name ?: "Item"}" }
+                    if (activeTickets.isEmpty()) {
+                        Toast.makeText(this@PaymentsActivity, "No active loans found. All loans are currently renewed or redeemed.", Toast.LENGTH_LONG).show()
+                        spinnerTicketSelection.setText("No Active Tickets Available", false)
+                        spinnerTicketSelection.isEnabled = false
+                        btnProceed.isEnabled = false
+                        btnProceed.alpha = 0.5f
+                        return
+                    }
+
+                    val ticketLabels = activeTickets.map { "${it.referenceNo ?: "PT-"+it.pawnTicketNo} - ${it.inventory?.itemName ?: "Item"}" }
                     val adapter = ArrayAdapter(this@PaymentsActivity, android.R.layout.simple_dropdown_item_1line, ticketLabels)
                     spinnerTicketSelection.setAdapter(adapter)
 
-                    // Auto-Select logic from Intent
+                    // NEW TWEAK: Make it act like a true searchable combobox
+                    spinnerTicketSelection.setOnClickListener {
+                        spinnerTicketSelection.showDropDown() // Forces the full list to show on click
+                    }
+                    spinnerTicketSelection.setOnFocusChangeListener { _, hasFocus ->
+                        if (hasFocus) spinnerTicketSelection.showDropDown()
+                    }
+
+                    // Auto-Select logic from Intent (Using Reference Number or Ticket Number)
+                    val preselectedRefNo = intent.getStringExtra("PRESELECTED_REF_NO")
                     val passedTicketNo = intent.getStringExtra("TICKET_NO")
-                    if (passedTicketNo != null) {
-                        val index = activeTickets.indexOfFirst { it.pawn_ticket_no.toString() == passedTicketNo }
-                        if (index != -1) {
-                            activeTicket = activeTickets[index]
-                            spinnerTicketSelection.setText(ticketLabels[index], false)
-                            calculateAmount()
-                        }
+
+                    val index = when {
+                        preselectedRefNo != null -> activeTickets.indexOfFirst { it.referenceNo == preselectedRefNo || it.pawnTicketNo.toString() == preselectedRefNo }
+                        passedTicketNo != null -> activeTickets.indexOfFirst { it.pawnTicketNo.toString() == passedTicketNo }
+                        else -> -1
+                    }
+
+                    if (index != -1) {
+                        activeTicket = activeTickets[index]
+                        spinnerTicketSelection.setText(ticketLabels[index], false)
+                        calculateAmount()
                     }
                 }
             }
@@ -140,13 +235,13 @@ class PaymentsActivity : AppCompatActivity() {
 
     private fun fetchPaymentHistory() {
         val customerId = sessionManager.getCustomerId() ?: ""
-        val shopCode = sessionManager.getShopCode() ?: ""
+        val tenantSchema = sessionManager.getTenantSchema() ?: ""
 
-        if (customerId.isEmpty() || shopCode.isEmpty()) return
+        if (customerId.isEmpty() || tenantSchema.isEmpty()) return
 
-        android.util.Log.d("DEBUG_PAYMENTS", "Fetching payments - Customer ID: $customerId | Shop Code: $shopCode")
+        android.util.Log.d("DEBUG_PAYMENTS", "Fetching payments - Customer ID: $customerId | Tenant Schema: $tenantSchema")
 
-        ApiClient.apiService.getPaymentHistory(customerId, shopCode).enqueue(object : Callback<PaymentHistoryResponse> {
+        ApiClient.apiService.getPaymentHistory(customerId, tenantSchema).enqueue(object : Callback<PaymentHistoryResponse> {
             override fun onResponse(call: Call<PaymentHistoryResponse>, response: Response<PaymentHistoryResponse>) {
                 val body = response.body()
                 
@@ -194,28 +289,44 @@ class PaymentsActivity : AppCompatActivity() {
     private fun calculateAmount() {
         val ticket = activeTicket ?: return
 
-        val principal = ticket.principal_amount
+        // 1. Unhide the breakdown card now that a ticket is selected
+        findViewById<View>(R.id.cardBreakdown).visibility = View.VISIBLE
+
+        val principal = ticket.principalAmount
         val systemInterestRate = 0.035 // 3.5%
         val systemServiceFee = 5.00
+        
+        val interestDue = principal * systemInterestRate
+        minPaymentRequired = interestDue + systemServiceFee
+
+        // 2. Populate the static fees in the breakdown
+        findViewById<TextView>(R.id.tvBreakdownInterest).text = String.format("₱%.2f", interestDue)
+        findViewById<TextView>(R.id.tvBreakdownFee).text = String.format("₱%.2f", systemServiceFee)
 
         when (selectedPaymentType) {
             "renewal" -> {
-                val totalRenew = (principal * systemInterestRate) + systemServiceFee
-                etAmount.setText(String.format("%.2f", totalRenew))
+                // UPDATE: Show the actual renewal cost in the big box instead of 0.00
+                etAmount.setText(String.format("%.2f", minPaymentRequired))
                 etAmount.isEnabled = false 
+                findViewById<TextView>(R.id.tvBreakdownPrincipalLabel).text = "Principal Reduction"
             }
             "redemption" -> {
-                val totalRedeem = principal + (principal * systemInterestRate) + systemServiceFee
-                etAmount.setText(String.format("%.2f", totalRedeem))
+                // UPDATE: Calculate the grand total and show it in the big box
+                val redemptionTotal = principal + minPaymentRequired
+                etAmount.setText(String.format("%.2f", redemptionTotal)) 
                 etAmount.isEnabled = false 
+                findViewById<TextView>(R.id.tvBreakdownPrincipalLabel).text = "Full Principal"
             }
             "principal" -> {
                 etAmount.setText("")
                 etAmount.isEnabled = true 
-                etAmount.hint = "Enter Custom Amount"
+                etAmount.hint = "Enter principal to pay off"
+                findViewById<TextView>(R.id.tvBreakdownPrincipalLabel).text = "Principal Reduction"
                 etAmount.requestFocus()
             }
         }
+        
+        validateAmount() // Trigger the live total calculation
     }
 
     private fun processPayment() {
@@ -233,13 +344,16 @@ class PaymentsActivity : AppCompatActivity() {
 
         Toast.makeText(this, "Securing PayMongo Gateway...", Toast.LENGTH_SHORT).show()
 
-        val schemaName = sessionManager.getSchemaName() ?: ""
+        val tenantSchema = sessionManager.getTenantSchema() ?: ""
+        val customerId = sessionManager.getCustomerId() ?: ""
+        val amountFormatted = String.format("%.2f", amountStr.toDoubleOrNull() ?: 0.0)
 
         val request = CheckoutRequest(
-            ticket_no = ticket.pawn_ticket_no.toString(),
+            customer_id = customerId,
+            ticket_no = ticket.pawnTicketNo.toString(), // MUST BE THE RAW SERIAL ID
             payment_type = selectedPaymentType,
-            tenant_schema = schemaName,
-            amount = amountStr
+            tenant_schema = tenantSchema,
+            amount = amountFormatted
         )
 
         ApiClient.apiService.generatePaymentLink(request).enqueue(object : Callback<CheckoutResponse> {
@@ -294,6 +408,18 @@ class PaymentsActivity : AppCompatActivity() {
                 }
                 else -> false
             }
+        }
+    }
+
+    private fun setupTopBar() {
+        // Logout Button
+        findViewById<ImageButton>(R.id.btnLogout)?.setOnClickListener {
+            startActivity(Intent(this, LogoutActivity::class.java))
+        }
+        
+        // Notifications Button
+        findViewById<ImageButton>(R.id.btnNotifications)?.setOnClickListener {
+            startActivity(Intent(this, NotificationsActivity::class.java))
         }
     }
 }

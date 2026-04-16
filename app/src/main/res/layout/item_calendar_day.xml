@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="8dp"
+    android:id="@+id/layoutDayRoot"
+    android:clickable="true"
+    android:focusable="true"
+    android:background="?attr/selectableItemBackground">
+
+    <TextView
+        android:id="@+id/tvDayNumber"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="1"
+        android:textSize="14sp"
+        android:textColor="#191c1e" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="2dp">
+
+        <View
+            android:id="@+id/dotRed"
+            android:layout_width="4dp"
+            android:layout_height="4dp"
+            android:layout_marginHorizontal="1dp"
+            android:background="#ef4444"
+            android:visibility="gone" />
+
+        <View
+            android:id="@+id/dotBlue"
+            android:layout_width="4dp"
+            android:layout_height="4dp"
+            android:layout_marginHorizontal="1dp"
+            android:background="#00327d"
+            android:visibility="gone" />
+
+        <View
+            android:id="@+id/dotGreen"
+            android:layout_width="4dp"
+            android:layout_height="4dp"
+            android:layout_marginHorizontal="1dp"
+            android:background="#22c55e"
+            android:visibility="gone" />
+
+        <View
+            android:id="@+id/dotYellow"
+            android:layout_width="4dp"
+            android:layout_height="4dp"
+            android:layout_marginHorizontal="1dp"
+            android:background="#eab308"
+            android:visibility="gone" />
+    </LinearLayout>
+</LinearLayout>

@@ -12,9 +12,6 @@ import com.example.mobileapppawnshop.viewmodel.AuthViewModel
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 
-/**
- * Activity for requesting a password reset
- */
 class ForgotPasswordActivity : AppCompatActivity() {
 
     private lateinit var viewModel: AuthViewModel
@@ -30,8 +27,11 @@ class ForgotPasswordActivity : AppCompatActivity() {
         val tvBackToLogin = findViewById<TextView>(R.id.tvBackToLogin)
 
         btnSendResetLink.setOnClickListener {
-            val email = etResetEmail.text.toString()
+            val email = etResetEmail.text.toString().trim()
             if (ValidationUtils.validateEmail(email)) {
+                // UI State: Disable
+                btnSendResetLink.isEnabled = false
+                btnSendResetLink.text = "Sending..."
                 viewModel.requestPasswordReset(email)
             } else {
                 etResetEmail.error = "Valid email is required"
@@ -42,13 +42,17 @@ class ForgotPasswordActivity : AppCompatActivity() {
             finish()
         }
 
-        viewModel.resetRequestResult.observe(this) { success ->
-            if (success) {
+        viewModel.forgotPasswordResult.observe(this) { result ->
+            // Re-enable
+            btnSendResetLink.isEnabled = true
+            btnSendResetLink.text = "Send Reset Link"
+
+            if (result.first) {
                 val intent = Intent(this, ForgotVerifyActivity::class.java)
-                intent.putExtra("email", etResetEmail.text.toString())
+                intent.putExtra("email", etResetEmail.text.toString().trim())
                 startActivity(intent)
             } else {
-                Toast.makeText(this, "Failed to send reset link", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, result.second, Toast.LENGTH_LONG).show()
             }
         }
     }

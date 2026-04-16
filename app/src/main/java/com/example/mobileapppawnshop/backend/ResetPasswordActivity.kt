@@ -6,39 +6,75 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.example.mobileapppawnshop.R
-import com.example.mobileapppawnshop.utils.ValidationUtils
+import com.example.mobileapppawnshop.utils.SessionManager
 import com.example.mobileapppawnshop.viewmodel.AuthViewModel
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
 
-/**
- * Activity for resetting the user's password
- */
 class ResetPasswordActivity : AppCompatActivity() {
 
     private lateinit var viewModel: AuthViewModel
+    private lateinit var sessionManager: SessionManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        // Reusing forgot_password_layout logic for simplicity or a specific reset layout if it exists
-        // Looking at the requirements, we need a New Password and Confirm Password screen.
-        // If a separate layout doesn't exist, we might need to find which one is intended for this.
-        // Assuming there might be a missing layout or forgot_password_layout is used.
-        // Wait, the prompt says "Reset Password" is a screen already designed.
-        // I don't see "reset_password_layout.xml" in the file list. 
-        // Let me check if success_confirmation_layout is used for something else.
-        
-        // Re-checking file list: forgot_password_layout.xml, success_confirmation_layout.xml...
-        // Maybe it's not in the list I saw. Let me list files again to be sure.
-        setContentView(R.layout.forgot_password_layout) // Temporary placeholder
-        
-        viewModel = ViewModelProvider(this)[AuthViewModel::class.java]
+        setContentView(R.layout.reset_password_layout)
 
-        // Actually, let's look for a layout that has 2 password fields.
-        // If not found, I will use forgot_password_layout and adapt if possible, 
-        // but the prompt says DO NOT MODIFY XML.
-        
-        // Let's assume there is a layout I missed or forgot_password_layout is actually the one.
-        // But forgot_password_layout only has 1 email field.
+        viewModel = ViewModelProvider(this)[AuthViewModel::class.java]
+        sessionManager = SessionManager(this)
+
+        // 1. Retrieve email, code, and session data
+        val email = intent.getStringExtra("email") ?: ""
+        val code = intent.getStringExtra("code") ?: ""
+        val schemaName = sessionManager.getSchemaName() ?: ""
+
+        val etNewPassword = findViewById<TextInputEditText>(R.id.etNewPassword)
+        val etConfirmPassword = findViewById<TextInputEditText>(R.id.etConfirmPassword)
+        val btnUpdatePassword = findViewById<MaterialButton>(R.id.btnUpdatePassword)
+
+        btnUpdatePassword.setOnClickListener {
+            val newPass = etNewPassword.text.toString().trim()
+            val confirmPass = etConfirmPassword.text.toString().trim()
+
+            // 2. Validate password
+            if (newPass.length < 6) {
+                etNewPassword.error = "Password must be at least 6 characters"
+                return@setOnClickListener
+            }
+
+            if (newPass != confirmPass) {
+                etConfirmPassword.error = "Passwords do not match"
+                return@setOnClickListener
+            }
+
+            // 3. UI State: Updating...
+            btnUpdatePassword.isEnabled = false
+            btnUpdatePassword.text = "Updating..."
+            viewModel.updatePassword(email, code, newPass, schemaName)
+        }
+
+        // 4. Observe the result
+        viewModel.resetPasswordResult.observe(this) { resultPair ->
+            val btnUpdate = findViewById<MaterialButton>(R.id.btnUpdatePassword)
+            btnUpdate.isEnabled = true
+            btnUpdate.text = "Update Password"
+
+            if (resultPair.first) {
+                // STEP 1: DESTROY THE LOCAL SESSION IMMEDIATELY
+                sessionManager.logoutUser() 
+
+                // STEP 2: ROUTE TO SUCCESS SCREEN
+                val intent = Intent(this, SuccessConfirmationActivity::class.java).apply {
+                    putExtra("message", "Password Updated!")
+                    putExtra("sub_message", "Security protocol complete. Please log in with your new password.")
+                }
+                startActivity(intent)
+                
+                // STEP 3: WIPE THE ACTIVITY STACK
+                finishAffinity() 
+            } else {
+                Toast.makeText(this, resultPair.second, Toast.LENGTH_LONG).show()
+            }
+        }
     }
 }

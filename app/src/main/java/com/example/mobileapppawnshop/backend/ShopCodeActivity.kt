@@ -72,7 +72,7 @@ class ShopCodeActivity : AppCompatActivity() {
 
                             Toast.makeText(this@ShopCodeActivity, "Connected to: $shopName", Toast.LENGTH_SHORT).show()
 
-                            val intent = Intent(this@ShopCodeActivity, LoginActivity::class.java).apply {
+                            val intent = Intent(this@ShopCodeActivity, GatewaySplashActivity::class.java).apply {
                                 putExtra("schema_name", schemaName)
                                 putExtra("shop_name", shopName)
                             }

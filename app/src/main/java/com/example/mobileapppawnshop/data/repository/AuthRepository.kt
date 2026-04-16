@@ -1,159 +1,188 @@
 package com.example.mobileapppawnshop.data.repository
 
-import com.example.mobileapppawnshop.data.model.User
-import org.json.JSONObject
-import java.net.HttpURLConnection
-import java.net.URL
 import android.util.Log
+import com.example.mobileapppawnshop.backend.*
+import com.example.mobileapppawnshop.data.model.User
 
 /**
- * Repository for handling authentication logic with the real database
+ * Modernized Repository using Retrofit for 2FA Authentication
  */
 class AuthRepository {
 
-    // 1. THE FOLDER HIERARCHY URLs
-    // Mobile API (Login/Connect Shop) is in 'src'
-    private val loginUrl = "https://pawnereno.onrender.com/src/mobile_api.php"
-
-    // Register, Verify, and Send OTP are in 'api'
-    private val registerUrl = "https://pawnereno.onrender.com/api/register.php"
-    private val verifyUrl = "https://pawnereno.onrender.com/api/verify.php"
-    private val sendOtpUrl = "https://pawnereno.onrender.com/api/send_login_otp.php"
-
-    // UPDATED: Now returns a Pair.
-    // The first item is the User (if successful), the second item is the Error Message (if failed).
-    fun login(email: String, pass: String, schemaName: String): Pair<User?, String?> {
+    // 1. REGISTRATION (Step 1)
+    fun register(name: String, email: String, phone: String, pass: String, schemaName: String): Pair<Boolean, String> {
         return try {
-            val url = URL(loginUrl) // Points to src/
-            val conn = url.openConnection() as HttpURLConnection
-
-            conn.connectTimeout = 60000
-            conn.readTimeout = 60000
-            conn.requestMethod = "POST"
-            conn.setRequestProperty("Content-Type", "application/json")
-            conn.doOutput = true
-
-            val json = JSONObject().apply {
-                put("action", "login")
-                put("email", email)
-                put("password", pass)
-                put("schema_name", schemaName)
-            }
-
-            conn.outputStream.use { it.write(json.toString().toByteArray()) }
-
-            val response = conn.inputStream.bufferedReader().use { it.readText() }
-            val resJson = JSONObject(response)
-
-            if (resJson.getString("status") == "success") {
-                val userJson = resJson.getJSONObject("user")
-                
-                // --- THE FIX: Pull the real ID from your PHP JSON ---
-                val realId = userJson.optString("id", userJson.optString("customer_id", "0"))
-                val user = User(id = realId, fullName = userJson.getString("fullName"), email = userJson.getString("email"))
-                
-                Pair(user, null) // Success: Return user, no error message
+            val request = RegisterRequest(name, email, phone, pass, schemaName)
+            val response = ApiClient.apiService.registerUser(request).execute()
+            
+            if (response.isSuccessful && response.body()?.status == "success") {
+                Pair(true, response.body()?.message ?: "OTP Sent")
             } else {
-                // FAILURE: Grab the exact message from mobile_api.php!
-                val errorMessage = resJson.optString("message", "Invalid email or password.")
-                Pair(null, errorMessage) // Fail: Return no user, but include the message
+                Pair(false, "Registration failed. Email may already exist.")
             }
-        } catch (e: Exception) {
-            Log.e("AuthRepository", "Login Error: ${e.message}")
-            Pair(null, "Connection error. Please try again.")
-        }
-    }
-
-    fun register(name: String, email: String, phone: String, pass: String, schemaName: String): Boolean {
-        return try {
-            val url = URL(registerUrl) // Points to api/
-            val conn = url.openConnection() as HttpURLConnection
-
-            conn.connectTimeout = 60000
-            conn.readTimeout = 60000
-            conn.requestMethod = "POST"
-            conn.setRequestProperty("Content-Type", "application/json")
-            conn.doOutput = true
-
-            val json = JSONObject().apply {
-                put("full_name", name)
-                put("email", email)
-                put("phone_number", phone)
-                put("password", pass)
-                put("schema_name", schemaName)
-            }
-
-            conn.outputStream.use { it.write(json.toString().toByteArray()) }
-
-            val response = conn.inputStream.bufferedReader().use { it.readText() }
-            val resJson = JSONObject(response)
-
-            resJson.getString("status") == "success"
         } catch (e: Exception) {
             Log.e("AuthRepository", "Register Error: ${e.message}")
-            false
+            Pair(false, "Network error during registration.")
         }
     }
 
-    fun verifyCode(email: String, code: String, type: String, shopCode: String): Boolean {
+    // 2. VERIFY REGISTRATION OTP (Step 2)
+    fun verifyRegisterOtp(email: String, code: String, schemaName: String): Pair<Boolean, String> {
         return try {
-            val url = URL(verifyUrl) // Points to api/
-            val conn = url.openConnection() as HttpURLConnection
+            val request = RegisterOtpRequest(email, code, schemaName)
+            val response = ApiClient.apiService.verifyRegisterOtp(request).execute()
 
-            conn.connectTimeout = 60000
-            conn.readTimeout = 60000
-            conn.requestMethod = "POST"
-            conn.setRequestProperty("Content-Type", "application/json")
-            conn.doOutput = true
-
-            val json = JSONObject().apply {
-                put("email", email)
-                put("code", code)
-                put("type", type)
-                put("shop_code", shopCode)
+            if (response.isSuccessful && response.body()?.status == "success") {
+                Pair(true, response.body()?.message ?: "Verified")
+            } else {
+                Pair(false, "Invalid or expired code.")
             }
-
-            conn.outputStream.use { it.write(json.toString().toByteArray()) }
-
-            val responseCode = conn.responseCode
-            responseCode == 200
-
         } catch (e: Exception) {
-            Log.e("AuthRepository", "Verify Error: ${e.message}")
-            false
+            Log.e("AuthRepository", "Verify Reg OTP Error: ${e.message}")
+            Pair(false, "Network error during verification.")
         }
     }
 
+    // 3. LOGIN CREDENTIAL CHECK (Step 1)
+    fun loginAuth(email: String, pass: String, schemaName: String): Pair<Boolean, String> {
+        return try {
+            val request = LoginAuthRequest(email, pass, schemaName)
+            val response = ApiClient.apiService.loginAuth(request).execute()
+
+            if (response.isSuccessful && response.body()?.status == "success") {
+                Pair(true, response.body()?.message ?: "OTP Sent")
+            } else {
+                Pair(false, "Invalid email or password.")
+            }
+        } catch (e: Exception) {
+            Log.e("AuthRepository", "Login Auth Error: ${e.message}")
+            Pair(false, "Network error during login.")
+        }
+    }
+
+    // 4. VERIFY LOGIN OTP & GET SESSION DATA (Step 2)
+    fun verifyLoginOtp(email: String, code: String, schemaName: String): Pair<User?, String> {
+        return try {
+            val request = LoginOtpRequest(email, code, schemaName)
+            val response = ApiClient.apiService.verifyLoginOtp(request).execute()
+
+            if (response.isSuccessful && response.body()?.status == "success") {
+                val body = response.body()!!
+                val user = User(
+                    id = body.customer_id.toString(),
+                    fullName = body.full_name ?: "Customer",
+                    email = email,
+                    kycStatus = body.kyc_status ?: "unverified"
+                )
+                Pair(user, "Login successful")
+            } else {
+                Pair(null, "Invalid or expired login code.")
+            }
+        } catch (e: Exception) {
+            Log.e("AuthRepository", "Verify Login OTP Error: ${e.message}")
+            Pair(null, "Network error during login verification.")
+        }
+    }
+
+    // 5. LEGACY VERIFY (Type-based)
+    fun verifyCode(email: String, code: String, type: String, shopCode: String): Pair<Boolean, String?> {
+        return try {
+            val request = LegacyVerifyRequest(email, code, type, shopCode)
+            val response = ApiClient.apiService.verifyLegacyCode(request).execute()
+            if (response.isSuccessful && (response.body()?.status == "success" || response.body()?.status == "verified")) {
+                Pair(true, response.body()?.kyc_status ?: "unverified")
+            } else {
+                Pair(false, response.body()?.message ?: "Verification failed")
+            }
+        } catch (e: Exception) {
+            Log.e("AuthRepository", "Verify Code Error: ${e.message}")
+            Pair(false, "Network error during verification.")
+        }
+    }
+
+    // 6. SEND LOGIN OTP (Legacy)
     fun sendLoginOtp(email: String, shopCode: String): Boolean {
         return try {
-            val url = URL(sendOtpUrl) // Points to api/
-            val conn = url.openConnection() as HttpURLConnection
-
-            conn.connectTimeout = 60000
-            conn.readTimeout = 60000
-            conn.requestMethod = "POST"
-            conn.setRequestProperty("Content-Type", "application/json")
-            conn.doOutput = true
-
-            val json = JSONObject().apply {
-                put("email", email)
-                put("shop_code", shopCode)
-            }
-
-            conn.outputStream.use { it.write(json.toString().toByteArray()) }
-            conn.responseCode == 200
-
+            val request = LegacyOtpRequest(email, shopCode)
+            val response = ApiClient.apiService.sendLoginOtpLegacy(request).execute()
+            response.isSuccessful && response.body()?.status == "success"
         } catch (e: Exception) {
             Log.e("AuthRepository", "Send OTP Error: ${e.message}")
             false
         }
     }
 
-    fun resetPassword(email: String): Boolean {
-        return email.isNotEmpty()
+    // 7. PASSWORD RESET PIPELINE
+    fun requestPasswordReset(email: String): Pair<Boolean, String> {
+        return try {
+            val response = ApiClient.apiService.forgotPassword(ForgotPasswordRequest(email)).execute()
+            if (response.isSuccessful && response.body()?.status == "success") {
+                Pair(true, response.body()?.message ?: "Reset email sent.")
+            } else {
+                val errorJson = response.errorBody()?.string()
+                val errorMessage = try { org.json.JSONObject(errorJson).getString("message") } catch (e: Exception) { "Failed to send reset link." }
+                Pair(false, errorMessage)
+            }
+        } catch (e: Exception) {
+            Pair(false, "Network error.")
+        }
     }
 
-    fun updatePassword(password: String): Boolean {
-        return password.length >= 8
+    fun updatePassword(email: String, code: String, newPass: String, schemaName: String): Pair<Boolean, String> {
+        return try {
+            val request = ResetPasswordRequest(email, code, newPass, schemaName)
+            val response = ApiClient.apiService.resetPassword(request).execute()
+            if (response.isSuccessful && response.body()?.status == "success") {
+                Pair(true, response.body()?.message ?: "Password updated successfully!")
+            } else {
+                val errorJson = response.errorBody()?.string()
+                val errorMessage = try { org.json.JSONObject(errorJson).getString("message") } catch (e: Exception) { "Failed to reset password." }
+                Pair(false, errorMessage)
+            }
+        } catch (e: Exception) {
+            Pair(false, "Network error.")
+        }
+    }
+
+    fun changePasswordDirect(email: String, currentPass: String, newPass: String, schemaName: String): Pair<Boolean, String> {
+        return try {
+            val request = DirectChangeRequest(email, currentPass, newPass, schemaName)
+            val response = ApiClient.apiService.changePasswordDirect(request).execute()
+            if (response.isSuccessful && response.body()?.status == "success") {
+                Pair(true, response.body()?.message ?: "Password changed successfully!")
+            } else {
+                val errorJson = response.errorBody()?.string()
+                val errorMessage = try { org.json.JSONObject(errorJson).getString("message") } catch (e: Exception) { "Failed to change password." }
+                Pair(false, errorMessage)
+            }
+        } catch (e: Exception) {
+            Pair(false, "Network error during password update.")
+        }
+    }
+
+    // 8. RESEND OTP
+    fun resendOtp(email: String, type: String): Pair<Boolean, String> {
+        return try {
+            val response = ApiClient.apiService.resendOtp(ResendOtpRequest(email, type)).execute()
+            if (response.isSuccessful && response.body()?.status == "success") {
+                Pair(true, response.body()?.message ?: "Code resent successfully!")
+            } else {
+                // Extract the REAL error message from PHP
+                val errorJson = response.errorBody()?.string()
+                val errorMessage = try {
+                    if (errorJson != null) {
+                        org.json.JSONObject(errorJson).getString("message")
+                    } else {
+                        "Failed to resend code."
+                    }
+                } catch (e: Exception) {
+                    "Failed to resend code."
+                }
+                Pair(false, errorMessage)
+            }
+        } catch (e: Exception) {
+            Log.e("AuthRepository", "Resend Error: ${e.message}")
+            Pair(false, "Network error during resend.")
+        }
     }
 }

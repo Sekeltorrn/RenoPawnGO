@@ -12,57 +12,61 @@
     app:strokeColor="#1e293b"
     app:strokeWidth="1dp">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
         android:padding="14dp">
 
         <TextView
             android:id="@+id/tvItemName"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
-            android:fontFamily="sans-serif-medium"
+            android:fontFamily="sans-serif-black"
             android:text="Loading Item..."
             android:textColor="#ffffff"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:ellipsize="end"
+            android:maxLines="1"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
         <TextView
             android:id="@+id/tvTicketNo"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginTop="2dp"
             android:text="Ticket No: ----"
             android:textColor="#94a3b8"
-            android:textSize="12sp" />
+            android:textSize="12sp"
+            app:layout_constraintTop_toBottomOf="@id/tvItemName"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent" />
 
-        <LinearLayout
-            android:layout_width="match_parent"
+        <TextView
+            android:id="@+id/tvPrincipal"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="10dp"
-            android:orientation="horizontal"
-            android:baselineAligned="false">
+            android:layout_marginTop="12dp"
+            android:fontFamily="sans-serif-black"
+            android:text="₱0.00"
+            android:textColor="#60a5fa"
+            android:textSize="15sp"
+            app:layout_constraintTop_toBottomOf="@id/tvTicketNo"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="parent" />
 
-            <TextView
-                android:id="@+id/tvPrincipal"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:fontFamily="sans-serif-black"
-                android:text="₱0.00"
-                android:textColor="#60a5fa"
-                android:textSize="15sp" />
+        <TextView
+            android:id="@+id/tvDueDate"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif-medium"
+            android:text="Due: ----"
+            android:textColor="#e2e8f0"
+            android:textSize="13sp"
+            app:layout_constraintBottom_toBottomOf="@id/tvPrincipal"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/tvPrincipal" />
 
-            <TextView
-                android:id="@+id/tvDueDate"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:fontFamily="sans-serif-medium"
-                android:text="Due: ----"
-                android:textAlignment="viewEnd"
-                android:textColor="#e2e8f0"
-                android:textSize="13sp" />
-        </LinearLayout>
-    </LinearLayout>
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

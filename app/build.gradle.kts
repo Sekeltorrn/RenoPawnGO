@@ -59,8 +59,9 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
     
-    // Coil for Image Loading in Compose
+    // Coil for Image Loading (Compose & Standard Views)
     implementation(libs.coil.compose)
+    implementation(libs.coil)
 
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)

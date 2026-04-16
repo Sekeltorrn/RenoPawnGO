@@ -9,6 +9,7 @@ import androidx.lifecycle.ViewModelProvider
 import com.example.mobileapppawnshop.R
 import com.example.mobileapppawnshop.utils.SessionManager
 import com.example.mobileapppawnshop.utils.ValidationUtils
+import com.example.mobileapppawnshop.data.model.User
 import com.example.mobileapppawnshop.viewmodel.AuthViewModel
 import com.google.android.material.button.MaterialButton
 import com.google.android.material.textfield.TextInputEditText
@@ -69,7 +70,7 @@ class LoginActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            viewModel.login(email, pass, schemaName)
+            viewModel.loginAuth(email, pass, schemaName) // Call the NEW function
         }
 
         tvRegister.setOnClickListener {
@@ -91,40 +92,21 @@ class LoginActivity : AppCompatActivity() {
             finish()
         }
 
-        viewModel.loginResult.observe(this) { resultPair ->
-            val user = resultPair.first
+
+        viewModel.loginAuthResult.observe(this) { resultPair ->
+            val success = resultPair.first
             val errorMessage = resultPair.second
 
-            if (user != null) {
-                // --- THE FIX: PERSIST SESSION DATA ---
-                sessionManager.saveCustomerId(user.id)
-                
-                // TEMPORARY BYPASS: Set full login state immediately so Smart Routing works
-                sessionManager.saveUserLoginFull(user.email, user.fullName, user.id)
-
-                /* TODO: AUTH BYPASS ACTIVE. Uncomment this block when Email OTP is re-enabled.
-                viewModel.sendLoginOtp(user.email, schemaName)
-                Toast.makeText(this, "Verified! Sending code...", Toast.LENGTH_SHORT).show()
-
+            if (success) {
+                // PASSWORD CORRECT -> ROUTE TO OTP SCREEN
                 val intent = Intent(this, AccountVerifyActivity::class.java).apply {
-                    putExtra("email", user.email)
-                    putExtra("full_name", user.fullName)
-                    putExtra("customer_id", user.id) 
-                    putExtra("is_from_login", true)
-                    putExtra("shop_code", schemaName)
+                    putExtra("email", etIdentifier.text.toString())
+                    putExtra("schema_name", schemaName) 
+                    putExtra("is_from_login", true) 
                 }
                 startActivity(intent)
-                finish()
-                */
-
-                // TEMPORARY BYPASS NAVIGATION
-                Toast.makeText(this, "Login Successful!", Toast.LENGTH_SHORT).show()
-                val intent = Intent(this, CustomerDashboardActivity::class.java)
-                startActivity(intent)
-                finish()
             } else {
-                val msgToShow = errorMessage ?: "Login failed. Check credentials."
-                Toast.makeText(this, msgToShow, Toast.LENGTH_LONG).show()
+                Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()
             }
         }
     }

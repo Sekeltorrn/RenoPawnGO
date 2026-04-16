@@ -69,12 +69,12 @@ class KycViewModel : ViewModel() {
 
             try {
                 val response = ApiClient.apiService.uploadKyc(
-                    customerIdPart,
-                    tenantPart,
-                    idTypePart,
-                    idNumberPart,
-                    bodyFront,
-                    bodyBack
+                    customerId = customerIdPart,
+                    tenantSchema = tenantPart,
+                    idType = idTypePart,
+                    idNumber = idNumberPart,
+                    id_document = bodyFront,
+                    id_document_back = bodyBack
                 )
 
                 if (response.isSuccessful && response.body()?.success == true) {
@@ -108,8 +108,24 @@ class KycUploadActivity : ComponentActivity() {
 fun KycUploadScreen(customerId: String, tenantSchema: String, viewModel: KycViewModel = viewModel()) {
     var frontImageUri by remember { mutableStateOf<Uri?>(null) }
     var backImageUri by remember { mutableStateOf<Uri?>(null) }
+    var kycStatus by remember { mutableStateOf("unverified") }
+    var isLoadingStatus by remember { mutableStateOf(true) }
 
     val context = androidx.compose.ui.platform.LocalContext.current
+    
+    // Fetch current status to prevent redundant uploads
+    LaunchedEffect(Unit) {
+        ApiClient.apiService.getKycStatus(customerId, tenantSchema).enqueue(object : retrofit2.Callback<com.example.mobileapppawnshop.backend.KycStatusResponse> {
+            override fun onResponse(call: retrofit2.Call<com.example.mobileapppawnshop.backend.KycStatusResponse>, response: retrofit2.Response<com.example.mobileapppawnshop.backend.KycStatusResponse>) {
+                kycStatus = response.body()?.kyc_status ?: "unverified"
+                isLoadingStatus = false
+            }
+            override fun onFailure(call: retrofit2.Call<com.example.mobileapppawnshop.backend.KycStatusResponse>, t: Throwable) {
+                isLoadingStatus = false
+            }
+        })
+    }
+
     val scrollState = rememberScrollState()
 
     val frontPickerLauncher = rememberLauncherForActivityResult(
@@ -133,65 +149,90 @@ fun KycUploadScreen(customerId: String, tenantSchema: String, viewModel: KycView
         Text("KYC Verification", style = MaterialTheme.typography.headlineMedium)
         Spacer(modifier = Modifier.height(24.dp))
         
-        Text("Upload Front of ID", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
-        Spacer(modifier = Modifier.height(8.dp))
-        
-        OutlinedCard(
-            modifier = Modifier.size(width = 320.dp, height = 200.dp).clickable {
-                frontPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-            }
-        ) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                if (frontImageUri != null) {
-                    AsyncImage(
-                        model = frontImageUri,
-                        contentDescription = "Front of ID",
-                        modifier = Modifier.fillMaxSize()
+        if (isLoadingStatus) {
+            CircularProgressIndicator()
+        } else if (kycStatus.lowercase() == "pending" || kycStatus.lowercase() == "verified") {
+            Card(
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
+                modifier = Modifier.fillMaxWidth().padding(16.dp)
+            ) {
+                Column(modifier = Modifier.padding(24.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text(
+                        text = if (kycStatus.lowercase() == "pending") "Identity Under Review" else "Account Verified",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer
                     )
-                } else {
-                    Text("Tap to Select Front Image", color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-            }
-        }
-
-        Spacer(modifier = Modifier.height(32.dp))
-        
-        Text("Upload Back of ID", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
-        Spacer(modifier = Modifier.height(8.dp))
-        
-        OutlinedCard(
-            modifier = Modifier.size(width = 320.dp, height = 200.dp).clickable {
-                backPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
-            }
-        ) {
-            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                if (backImageUri != null) {
-                    AsyncImage(
-                        model = backImageUri,
-                        contentDescription = "Back of ID",
-                        modifier = Modifier.fillMaxSize()
+                    Spacer(modifier = Modifier.height(8.dp))
+                    Text(
+                        text = if (kycStatus.lowercase() == "pending") 
+                            "You have already submitted your documents. Please wait for employee approval." 
+                        else "Your identity has been successfully verified.",
+                        textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                        style = MaterialTheme.typography.bodyMedium
                     )
-                } else {
-                    Text("Tap to Select Back Image", color = MaterialTheme.colorScheme.onSurfaceVariant)
                 }
             }
-        }
-
-        Spacer(modifier = Modifier.height(40.dp))
-
-        Button(
-            onClick = {
-                if (frontImageUri != null && backImageUri != null) {
-                    viewModel.uploadId(context, frontImageUri!!, backImageUri!!, customerId, tenantSchema)
+        } else {
+            Text("Upload Front of ID", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            OutlinedCard(
+                modifier = Modifier.size(width = 320.dp, height = 200.dp).clickable {
+                    frontPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
                 }
-            },
-            enabled = frontImageUri != null && backImageUri != null && !viewModel.isUploading,
-            modifier = Modifier.fillMaxWidth().height(56.dp)
-        ) {
-            if (viewModel.isUploading) {
-                CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.onPrimary)
-            } else {
-                Text("Submit Verified Documents")
+            ) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    if (frontImageUri != null) {
+                        AsyncImage(
+                            model = frontImageUri,
+                            contentDescription = "Front of ID",
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    } else {
+                        Text("Tap to Select Front Image", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(32.dp))
+            
+            Text("Upload Back of ID", style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.primary)
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            OutlinedCard(
+                modifier = Modifier.size(width = 320.dp, height = 200.dp).clickable {
+                    backPickerLauncher.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
+                }
+            ) {
+                Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                    if (backImageUri != null) {
+                        AsyncImage(
+                            model = backImageUri,
+                            contentDescription = "Back of ID",
+                            modifier = Modifier.fillMaxSize()
+                        )
+                    } else {
+                        Text("Tap to Select Back Image", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(40.dp))
+
+            Button(
+                onClick = {
+                    if (frontImageUri != null && backImageUri != null) {
+                        viewModel.uploadId(context, frontImageUri!!, backImageUri!!, customerId, tenantSchema)
+                    }
+                },
+                enabled = frontImageUri != null && backImageUri != null && !viewModel.isUploading,
+                modifier = Modifier.fillMaxWidth().height(56.dp)
+            ) {
+                if (viewModel.isUploading) {
+                    CircularProgressIndicator(modifier = Modifier.size(24.dp), color = MaterialTheme.colorScheme.onPrimary)
+                } else {
+                    Text("Submit Verified Documents")
+                }
             }
         }
 

@@ -258,6 +258,7 @@
             </LinearLayout>
 
             <TextView
+                android:id="@+id/tvProjectionTitle"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="24dp"
@@ -269,6 +270,7 @@
                 android:layout_marginStart="4dp"/>
 
             <com.google.android.material.card.MaterialCardView
+                android:id="@+id/cardProjectionContainer"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp"
@@ -308,6 +310,18 @@
                 android:layout_marginTop="32dp"
                 android:layout_marginBottom="32dp"
                 android:orientation="vertical">
+
+                <TextView
+                    android:id="@+id/tvRenewedMessage"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="This ticket has been renewed. See the active ticket for current balance."
+                    android:textColor="#94a3b8"
+                    android:textSize="12sp"
+                    android:textAlignment="center"
+                    android:padding="16dp"
+                    android:visibility="gone"
+                    android:fontStyle="italic" />
 
                 <com.google.android.material.button.MaterialButton
                     android:id="@+id/btnPayOnline"

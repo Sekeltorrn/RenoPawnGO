@@ -32,7 +32,8 @@ class PaymentHistoryAdapter(private var historyList: List<PaymentRecord>) :
         val record = historyList[position]
         val formatter = NumberFormat.getCurrencyInstance(Locale("en", "PH"))
 
-        holder.tvTicketNo.text = "PT-${record.pawn_ticket_no}"
+        // Display reference number, fallback to old format if null
+        holder.tvTicketNo.text = record.reference_no ?: "PT-${record.pawn_ticket_no}"
         holder.tvPaymentType.text = record.payment_type.replaceFirstChar { it.uppercase() }
         holder.tvAmount.text = formatter.format(record.amount)
         holder.tvDate.text = record.payment_date

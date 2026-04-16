@@ -116,7 +116,7 @@
                     android:id="@+id/spinnerTicketSelection"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:inputType="none"
+                    android:inputType="text"
                     android:textColor="#1e293b"
                     android:textStyle="bold"
                     android:fontFamily="sans-serif" />
@@ -309,6 +309,57 @@
                             android:textColor="#00327d"
                             android:textSize="20sp" />
                     </RelativeLayout>
+
+                    <com.google.android.material.card.MaterialCardView
+                        android:id="@+id/cardBreakdown"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_marginTop="16dp"
+                        app:cardBackgroundColor="#f8fafc"
+                        app:cardCornerRadius="8dp"
+                        app:cardElevation="0dp"
+                        app:strokeColor="#e2e8f0"
+                        app:strokeWidth="1dp"
+                        android:visibility="gone">
+                        <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            android:padding="16dp">
+
+                            <TextView
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:text="Payment Breakdown"
+                                android:textColor="#64748b"
+                                android:textSize="12sp"
+                                android:textStyle="bold"
+                                android:layout_marginBottom="12dp"/>
+
+                            <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="4dp">
+                                <TextView android:id="@+id/tvBreakdownPrincipalLabel" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Principal to Pay" android:textColor="#475569" android:textSize="14sp"/>
+                                <TextView android:id="@+id/tvBreakdownPrincipal" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentEnd="true" android:text="₱0.00" android:textColor="#1e293b" android:textSize="14sp" android:textStyle="bold"/>
+                            </RelativeLayout>
+
+                            <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="4dp">
+                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Interest (3.5%)" android:textColor="#475569" android:textSize="14sp"/>
+                                <TextView android:id="@+id/tvBreakdownInterest" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentEnd="true" android:text="₱0.00" android:textColor="#1e293b" android:textSize="14sp" android:textStyle="bold"/>
+                            </RelativeLayout>
+
+                            <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginBottom="12dp">
+                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Service Fee" android:textColor="#475569" android:textSize="14sp"/>
+                                <TextView android:id="@+id/tvBreakdownFee" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentEnd="true" android:text="₱5.00" android:textColor="#1e293b" android:textSize="14sp" android:textStyle="bold"/>
+                            </RelativeLayout>
+
+                            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#cbd5e1" android:layout_marginBottom="12dp"/>
+
+                            <RelativeLayout android:layout_width="match_parent" android:layout_height="wrap_content">
+                                <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="Total Payable" android:textColor="#0f172a" android:textSize="16sp" android:textStyle="bold"/>
+                                <TextView android:id="@+id/tvBreakdownTotal" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_alignParentEnd="true" android:text="₱0.00" android:textColor="#ff6b00" android:textSize="18sp" android:textStyle="bold"/>
+                            </RelativeLayout>
+
+                        </LinearLayout>
+                    </com.google.android.material.card.MaterialCardView>
 
                     <com.google.android.material.button.MaterialButton
                         android:id="@+id/btnProceed"

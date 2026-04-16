@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout 
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#f8f9fa"
+    android:padding="32dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/llBottomButtons"
+        app:layout_constraintVertical_bias="0.4">
+
+        <LinearLayout
+            android:id="@+id/llSecureBadge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@drawable/badge_background" 
+            android:backgroundTint="#d6e3fb"
+            android:gravity="center"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="8dp"
+            android:layout_marginBottom="32dp">
+
+            <ImageView
+                android:layout_width="18dp"
+                android:layout_height="18dp"
+                android:src="@android:drawable/ic_secure"
+                app:tint="#003d9b" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="8dp"
+                android:fontFamily="sans-serif-medium"
+                android:text="SECURE ENVIRONMENT"
+                android:textColor="#003d9b"
+                android:textSize="12sp"
+                android:textStyle="bold" />
+        </LinearLayout>
+
+        <ImageView
+            android:id="@+id/ivShieldIcon"
+            android:layout_width="100dp"
+            android:layout_height="100dp"
+            android:layout_marginBottom="24dp"
+            android:src="@android:drawable/ic_lock_idle_lock"
+            app:tint="#0c56d0" />
+
+        <TextView
+            android:id="@+id/tvAuthAccess"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="AUTHORIZED ACCESS"
+            android:textColor="#0c56d0"
+            android:textSize="12sp"
+            android:textStyle="bold"
+            android:letterSpacing="0.2"
+            android:alpha="0.8"
+            android:layout_marginBottom="8dp" />
+
+        <TextView
+            android:id="@+id/tvShopName"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Merlin Pawnshop"
+            android:textColor="#191c1d"
+            android:textSize="32sp"
+            android:textStyle="bold"
+            android:textAlignment="center"
+            android:layout_marginBottom="16dp" />
+
+        <TextView
+            android:id="@+id/tvDescription"
+            android:layout_width="280dp"
+            android:layout_height="wrap_content"
+            android:text="You are currently connected to the encrypted terminal for item appraisal and secure storage."
+            android:textAlignment="center"
+            android:textColor="#434654"
+            android:textSize="14sp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:id="@+id/llBottomButtons"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:gravity="center"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnEnterTerminal"
+            android:layout_width="match_parent"
+            android:layout_height="64dp"
+            android:backgroundTint="#0052cc"
+            android:text="Enter Terminal"
+            android:textAllCaps="false"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            app:cornerRadius="32dp"
+            app:icon="@android:drawable/ic_media_play"
+            app:iconGravity="textEnd" />
+
+        <View
+            android:layout_width="48dp"
+            android:layout_height="1dp"
+            android:layout_marginTop="24dp"
+            android:background="#c3c6d6" />
+
+        <TextView
+            android:id="@+id/tvWrongShop"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:clickable="true"
+            android:focusable="true"
+            android:padding="8dp"
+            android:text="Not the right shop? Re-enter Code"
+            android:textColor="#0052cc"
+            android:textSize="14sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

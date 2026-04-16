@@ -19,6 +19,12 @@ class SessionManager(context: Context) {
         private const val KEY_SHOP_CODE = "SHOP_CODE"
         private const val KEY_SCHEMA_NAME = "SchemaName"
         private const val KEY_SHOP_NAME = "ShopName"
+        private const val KEY_KYC_STATUS = "KycStatus"
+
+        // Persistent Dismissal Keys
+        const val IS_KYC_CARD_DISMISSED = "IS_KYC_CARD_DISMISSED"
+        const val IS_CHANGE_APPROVED_DISMISSED = "IS_CHANGE_APPROVED_DISMISSED"
+        const val LAST_DISMISSED_REQUEST_ID = "LAST_DISMISSED_REQUEST_ID"
     }
 
     fun saveUserLogin(email: String, name: String) {
@@ -65,6 +71,14 @@ class SessionManager(context: Context) {
         return prefs.getString(KEY_CUSTOMER_ID, "")
     }
 
+    fun saveKycStatus(status: String) {
+        editor.putString(KEY_KYC_STATUS, status).apply()
+    }
+
+    fun getKycStatus(): String {
+        return prefs.getString(KEY_KYC_STATUS, "unverified") ?: "unverified"
+    }
+
     // --------------------------------
 
     fun isUserLoggedIn(): Boolean {
@@ -73,6 +87,10 @@ class SessionManager(context: Context) {
 
     fun getSchemaName(): String? {
         return prefs.getString(KEY_SCHEMA_NAME, null)
+    }
+
+    fun getTenantSchema(): String? {
+        return getSchemaName() ?: ""
     }
 
     fun getShopName(): String? {
@@ -96,6 +114,30 @@ class SessionManager(context: Context) {
         editor.remove(KEY_SCHEMA_NAME)
         editor.remove(KEY_SHOP_NAME)
         editor.apply()
+    }
+
+    fun getBoolean(key: String, defaultValue: Boolean = false): Boolean {
+        return prefs.getBoolean(key, defaultValue)
+    }
+
+    fun setBoolean(key: String, value: Boolean) {
+        editor.putBoolean(key, value).apply()
+    }
+
+    fun saveLastDismissedRequestId(id: String) {
+        editor.putString(LAST_DISMISSED_REQUEST_ID, id).apply()
+    }
+
+    fun getLastDismissedRequestId(): String? {
+        return prefs.getString(LAST_DISMISSED_REQUEST_ID, null)
+    }
+
+    fun saveString(key: String, value: String) {
+        editor.putString(key, value).apply()
+    }
+
+    fun getString(key: String, defaultValue: String? = null): String? {
+        return prefs.getString(key, defaultValue)
     }
 
     fun clearAll() {
