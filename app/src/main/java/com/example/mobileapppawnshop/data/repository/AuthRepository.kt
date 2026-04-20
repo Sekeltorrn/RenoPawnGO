@@ -60,6 +60,21 @@ class AuthRepository {
         }
     }
 
+    // 3.1 LOGIN PHONE (Mock SMS)
+    fun loginPhone(phone: String, pass: String, schemaName: String): Pair<Boolean, String> {
+        return try {
+            val response = ApiClient.apiService.loginPhone(phone, pass, schemaName).execute()
+            if (response.isSuccessful && response.body()?.status == "success") {
+                Pair(true, response.body()?.message ?: "OTP Sent")
+            } else {
+                Pair(false, response.body()?.message ?: "Invalid credentials.")
+            }
+        } catch (e: Exception) {
+            Log.e("AuthRepository", "Login Phone Error: ${e.message}")
+            Pair(false, "Network error during phone login.")
+        }
+    }
+
     // 4. VERIFY LOGIN OTP & GET SESSION DATA (Step 2)
     fun verifyLoginOtp(email: String, code: String, schemaName: String): Pair<User?, String> {
         return try {
@@ -81,6 +96,28 @@ class AuthRepository {
         } catch (e: Exception) {
             Log.e("AuthRepository", "Verify Login OTP Error: ${e.message}")
             Pair(null, "Network error during login verification.")
+        }
+    }
+
+    // 4.1 VERIFY MOCK SMS OTP
+    fun verifyMockSms(phone: String, code: String, schemaName: String): Pair<User?, String> {
+        return try {
+            val response = ApiClient.apiService.verifyMockSms(phone, code, schemaName).execute()
+            if (response.isSuccessful && response.body()?.status == "success") {
+                val body = response.body()!!
+                val user = User(
+                    id = body.customer_id.toString(),
+                    fullName = body.full_name ?: "Walk-in Customer",
+                    email = phone, // Using phone as the email property for session
+                    kycStatus = body.kyc_status ?: "unverified"
+                )
+                Pair(user, "Login successful")
+            } else {
+                Pair(null, response.body()?.message ?: "Invalid or expired mock code.")
+            }
+        } catch (e: Exception) {
+            Log.e("AuthRepository", "Verify Mock SMS Error: ${e.message}")
+            Pair(null, "Network error during mock sms verification.")
         }
     }
 

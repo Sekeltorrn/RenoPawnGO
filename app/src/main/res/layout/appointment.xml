@@ -468,36 +468,12 @@
                 app:strokeColor="#c3c6d5"
                 app:strokeWidth="1dp">
 
-                <LinearLayout
+                <androidx.recyclerview.widget.RecyclerView
+                    android:id="@+id/rvAppointmentLog"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:gravity="center"
-                    android:orientation="vertical"
-                    android:padding="32dp">
-
-                    <ImageView
-                        android:layout_width="48dp"
-                        android:layout_height="48dp"
-                        android:src="@android:drawable/ic_menu_myplaces"
-                        app:tint="#737784" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:text="No appointments yet"
-                        android:textColor="#191c1e"
-                        android:textSize="14sp"
-                        android:textStyle="bold" />
-
-                    <TextView
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="Your scheduled branch visits will appear here."
-                        android:textColor="#57657a"
-                        android:textSize="12sp" />
-                </LinearLayout>
+                    android:padding="8dp"
+                    android:nestedScrollingEnabled="false" />
             </com.google.android.material.card.MaterialCardView>
 
         </LinearLayout>
@@ -506,14 +482,14 @@
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigation"
         android:layout_width="match_parent"
-        android:layout_height="72dp"
+        android:layout_height="56dp"
         android:layout_gravity="bottom"
         android:background="@android:color/white"
         app:elevation="16dp"
         app:itemIconSize="24dp"
         app:itemIconTint="@color/bottom_nav_selector"
         app:itemTextColor="@color/bottom_nav_selector"
-        app:labelVisibilityMode="labeled"
+        app:labelVisibilityMode="unlabeled"
         app:menu="@menu/dashboard_menu" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

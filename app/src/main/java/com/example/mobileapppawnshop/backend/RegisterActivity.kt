@@ -86,18 +86,29 @@ class RegisterActivity : AppCompatActivity() {
         // --- UPDATED NAVIGATION LOGIC ---
         viewModel.registerResult.observe(this) { resultPair ->
             val success = resultPair.first
+            val message = resultPair.second
+            
             if (success) {
-                // ROUTE TO OTP SCREEN
-                val intent = Intent(this, AccountVerifyActivity::class.java).apply {
-                    putExtra("email", etEmail.text.toString())
-                    putExtra("full_name", etFullName.text.toString())
-                    putExtra("schema_name", schemaName) 
-                    putExtra("is_from_login", false) 
+                if (message != null && message.startsWith("BYPASS:")) {
+                    // CUSTOMER B: ROUTE TO PROCEED TO LOGIN SCREEN
+                    val intent = Intent(this, BypassSuccessActivity::class.java).apply {
+                        putExtra("bypass_message", message)
+                    }
+                    startActivity(intent)
+                    finish()
+                } else {
+                    // CUSTOMER A: ROUTE TO OTP SCREEN
+                    val intent = Intent(this, AccountVerifyActivity::class.java).apply {
+                        putExtra("email", etEmail.text.toString())
+                        putExtra("full_name", etFullName.text.toString())
+                        putExtra("schema_name", schemaName) 
+                        putExtra("is_from_login", false) 
+                    }
+                    startActivity(intent)
+                    finish() 
                 }
-                startActivity(intent)
-                finish() 
             } else {
-                Toast.makeText(this, resultPair.second, Toast.LENGTH_LONG).show()
+                Toast.makeText(this, message, Toast.LENGTH_LONG).show()
             }
         }
     }

@@ -111,6 +111,22 @@ interface AuthService {
     @POST("api/login_otp.php")
     fun verifyLoginOtp(@Body request: LoginOtpRequest): Call<LoginOtpResponse>
 
+    @FormUrlEncoded
+    @POST("api/login_phone.php")
+    fun loginPhone(
+        @Field("phone") phone: String,
+        @Field("password") password: String,
+        @Field("tenant_schema") tenantSchema: String
+    ): Call<LoginOtpResponse> 
+
+    @FormUrlEncoded
+    @POST("api/mock_sms_verify.php")
+    fun verifyMockSms(
+        @Field("phone_number") phone: String,
+        @Field("code") code: String,
+        @Field("tenant_schema") tenantSchema: String
+    ): Call<LoginOtpResponse>
+
     @POST("api/resend_otp.php")
     fun resendOtp(@Body request: ResendOtpRequest): Call<BasicAuthResponse>
 
@@ -148,6 +164,9 @@ interface AuthService {
 
     @POST("api/get_notifications.php")
     fun getNotifications(@Body req: TenantCustomerRequest): Call<NotificationResponse>
+
+    @POST("api/cancel_appointment.php")
+    fun cancelAppointment(@Body request: CancelAppointmentRequest): Call<BasicAuthResponse>
 
     @POST("api/get_ticket_html.php")
     fun getTicketHtml(@Body req: TicketHtmlRequest): Call<TicketHtmlResponse>
@@ -298,10 +317,17 @@ data class BookAppointmentRequest(
 )
 
 data class BookedSlot(
+    val appointment_id: String?, 
     val appointment_date: String,
     val appointment_time: String,
     val status: String,
-    val customer_id: String
+    val customer_id: String,
+    val purpose: String?
+)
+
+data class CancelAppointmentRequest(
+    val appointment_id: String,
+    val tenant_schema: String
 )
 
 data class BookedSlotsResponse(

@@ -52,6 +52,23 @@ class AuthViewModel : ViewModel() {
         }
     }
 
+    // --- Phone Login (Mock SMS) ---
+    private val _loginPhoneResult = MutableLiveData<Pair<Boolean, String>>()
+    val loginPhoneResult: LiveData<Pair<Boolean, String>> = _loginPhoneResult
+
+    fun loginPhone(phone: String, pass: String, schemaName: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            _loginPhoneResult.postValue(repository.loginPhone(phone, pass, schemaName))
+        }
+    }
+
+    fun verifyMockSms(phone: String, code: String, schemaName: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            // Post result directly into the verifyLoginResult observer so UI flows remain the same
+            _verifyLoginResult.postValue(repository.verifyMockSms(phone, code, schemaName) as Pair<User?, String>)
+        }
+    }
+
     // --- 5. LEGACY SUPPORT (Forgot Password & Generic Verification) ---
     private val _verificationResult = MutableLiveData<Pair<Boolean, String?>>()
     val verificationResult: LiveData<Pair<Boolean, String?>> = _verificationResult

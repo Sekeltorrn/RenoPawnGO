@@ -264,14 +264,14 @@
     <com.google.android.material.bottomnavigation.BottomNavigationView
         android:id="@+id/bottomNavigation"
         android:layout_width="match_parent"
-        android:layout_height="72dp"
+        android:layout_height="56dp"
         android:layout_gravity="bottom"
         android:background="@android:color/white"
         app:elevation="16dp"
         app:itemIconSize="24dp"
         app:itemIconTint="@color/bottom_nav_selector"
         app:itemTextColor="@color/bottom_nav_selector"
-        app:labelVisibilityMode="labeled"
+        app:labelVisibilityMode="unlabeled"
         app:menu="@menu/dashboard_menu" />
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

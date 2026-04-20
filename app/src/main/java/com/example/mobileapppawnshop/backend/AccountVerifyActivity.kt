@@ -31,13 +31,14 @@ class AccountVerifyActivity : AppCompatActivity() {
         val tvEmailInfo = findViewById<TextView>(R.id.tvEmailInfo)
 
         // 1. Grab parameters from the previous screen
-        val email = intent.getStringExtra("email") ?: ""
+        val identifier = intent.getStringExtra("identifier") ?: intent.getStringExtra("email") ?: ""
+        val loginType = intent.getStringExtra("login_type") ?: "email"
         val fullName = intent.getStringExtra("full_name") ?: "Customer"
         val customerId = intent.getStringExtra("customer_id") ?: ""
         val isFromLogin = intent.getBooleanExtra("is_from_login", false)
         val schemaName = intent.getStringExtra("schema_name") ?: sessionManager.getSchemaName() ?: ""
 
-        tvEmailInfo.text = "Enter the 6-digit code sent to \n$email"
+        tvEmailInfo.text = "Enter the 6-digit code sent to \n$identifier"
 
         val otp1 = findViewById<EditText>(R.id.otp1)
         val otp2 = findViewById<EditText>(R.id.otp2)
@@ -53,9 +54,15 @@ class AccountVerifyActivity : AppCompatActivity() {
             val code = "${otp1.text}${otp2.text}${otp3.text}${otp4.text}${otp5.text}${otp6.text}"
             if (code.length == 6) {
                 if (isFromLogin) {
-                    viewModel.verifyLoginOtp(email, code, schemaName)
+                    if (loginType == "email") {
+                        // Standard Supabase Flow
+                        viewModel.verifyLoginOtp(identifier, code, schemaName)
+                    } else {
+                        // Walk-In Mock SMS Flow
+                        viewModel.verifyMockSms(identifier, code, schemaName)
+                    }
                 } else {
-                    viewModel.verifyRegisterOtp(email, code, schemaName)
+                    viewModel.verifyRegisterOtp(identifier, code, schemaName)
                 }
             } else {
                 Toast.makeText(this, "Please enter 6-digit code", Toast.LENGTH_SHORT).show()
@@ -101,10 +108,10 @@ class AccountVerifyActivity : AppCompatActivity() {
         // Dynamically update UI based on flow
         if (isFromLogin) {
             btnVerify.text = "Verify & Login"
-            tvEmailInfo.text = "Enter the 6-digit login code sent to \n$email"
+            tvEmailInfo.text = "Enter the 6-digit login code sent to \n$identifier"
         } else {
             btnVerify.text = "Verify & Create Account"
-            tvEmailInfo.text = "Enter the 6-digit registration code sent to \n$email"
+            tvEmailInfo.text = "Enter the 6-digit registration code sent to \n$identifier"
         }
 
         val tvResend = findViewById<TextView>(R.id.tvResendCode)
@@ -121,7 +128,7 @@ class AccountVerifyActivity : AppCompatActivity() {
             tvResend.alpha = 0.5f 
             
             val type = if (isFromLogin) "login" else "signup"
-            viewModel.resendOtp(email, type)
+            viewModel.resendOtp(identifier, type)
         }
 
         // 3. HANDLE SERVER RESPONSE

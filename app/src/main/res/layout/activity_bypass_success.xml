@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:padding="32dp"
+    android:background="#f7f9fb">
+
+    <ImageView
+        android:layout_width="100dp"
+        android:layout_height="100dp"
+        android:src="@drawable/app_logo"
+        android:layout_marginBottom="24dp"/>
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Global Account Linked"
+        android:textSize="24sp"
+        android:textColor="#00327d"
+        android:textStyle="bold"
+        android:textAlignment="center"
+        android:layout_marginBottom="12dp"/>
+
+    <TextView
+        android:id="@+id/tvBypassMessage"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Your existing global profile has been successfully integrated with this pawnshop node. Please note that your core identity credentials (name and email) are centrally managed and cannot be modified from this local branch."
+        android:textSize="16sp"
+        android:textColor="#546e7a"
+        android:lineSpacingExtra="6dp"
+        android:textAlignment="center"
+        android:layout_marginBottom="40dp"/>
+
+    <com.google.android.material.button.MaterialButton
+        android:id="@+id/btnProceedToLogin"
+        android:layout_width="match_parent"
+        android:layout_height="56dp"
+        android:text="PROCEED TO LOGIN"
+        android:textSize="16sp"
+        android:textStyle="bold"
+        app:backgroundTint="#00327d"
+        app:cornerRadius="8dp"
+        app:elevation="4dp"/>
+</LinearLayout>

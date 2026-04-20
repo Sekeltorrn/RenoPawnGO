@@ -57,11 +57,11 @@ class LoginActivity : AppCompatActivity() {
         val tvForgotPassword = findViewById<TextView>(R.id.tvForgotPassword)
 
         btnSignIn.setOnClickListener {
-            val email = etIdentifier.text.toString()
+            val identifier = etIdentifier.text.toString().trim()
             val pass = etPassword.text.toString()
 
-            if (!ValidationUtils.validateEmail(email)) {
-                etIdentifier.error = "Valid email is required"
+            if (!ValidationUtils.validateEmptyField(identifier)) {
+                etIdentifier.error = "Identifier cannot be empty"
                 return@setOnClickListener
             }
 
@@ -70,7 +70,11 @@ class LoginActivity : AppCompatActivity() {
                 return@setOnClickListener
             }
 
-            viewModel.loginAuth(email, pass, schemaName) // Call the NEW function
+            if (identifier.contains("@")) {
+                viewModel.loginAuth(identifier, pass, schemaName)
+            } else {
+                viewModel.loginPhone(identifier, pass, schemaName)
+            }
         }
 
         tvRegister.setOnClickListener {
@@ -99,14 +103,35 @@ class LoginActivity : AppCompatActivity() {
 
             if (success) {
                 // PASSWORD CORRECT -> ROUTE TO OTP SCREEN
+                val identifier = etIdentifier.text.toString().trim()
                 val intent = Intent(this, AccountVerifyActivity::class.java).apply {
-                    putExtra("email", etIdentifier.text.toString())
+                    putExtra("identifier", identifier)
                     putExtra("schema_name", schemaName) 
                     putExtra("is_from_login", true) 
+                    putExtra("login_type", if (identifier.contains("@")) "email" else "phone")
                 }
                 startActivity(intent)
             } else {
                 Toast.makeText(this, errorMessage, Toast.LENGTH_LONG).show()
+            }
+        }
+
+        viewModel.loginPhoneResult.observe(this) { resultPair ->
+            val success = resultPair.first
+            val message = resultPair.second // mock_otp or error
+
+            if (success) {
+                val identifier = etIdentifier.text.toString().trim()
+                Toast.makeText(this, "MOCK SMS: $message", Toast.LENGTH_LONG).show()
+                val intent = Intent(this, AccountVerifyActivity::class.java).apply {
+                    putExtra("identifier", identifier)
+                    putExtra("schema_name", schemaName) 
+                    putExtra("is_from_login", true) 
+                    putExtra("login_type", if (identifier.contains("@")) "email" else "phone")
+                }
+                startActivity(intent)
+            } else {
+                Toast.makeText(this, message, Toast.LENGTH_LONG).show()
             }
         }
     }

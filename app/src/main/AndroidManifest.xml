@@ -103,6 +103,10 @@
             android:screenOrientation="portrait" />
 
         <activity
+            android:name=".backend.BypassSuccessActivity"
+            android:exported="false" />
+
+        <activity
             android:name=".MainActivity"
             android:exported="false" />
 

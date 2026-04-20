@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.*
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.mobileapppawnshop.R
 import com.example.mobileapppawnshop.utils.SessionManager
@@ -42,6 +43,7 @@ class AppointmentActivity : AppCompatActivity() {
     private lateinit var rvCalendarMonth: RecyclerView
     private lateinit var tvFeedbackRow: TextView
     private lateinit var rvTimeSlots: RecyclerView
+    private lateinit var rvAppointmentLog: RecyclerView
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,6 +56,7 @@ class AppointmentActivity : AppCompatActivity() {
         rvCalendarMonth = findViewById(R.id.rvCalendarMonth)
         tvFeedbackRow = findViewById(R.id.tvFeedbackRow)
         rvTimeSlots = findViewById(R.id.rvTimeSlots)
+        rvAppointmentLog = findViewById(R.id.rvAppointmentLog)
         
         setupBottomNavigation()
         setupTopBar()
@@ -153,6 +156,11 @@ class AppointmentActivity : AppCompatActivity() {
                 if (response.isSuccessful) {
                     liveAppointments = response.body()?.appointments ?: emptyList()
                     renderCalendar() // Re-render calendar to update status dots
+                    
+                    // Update Appointment Log
+                    val myAppts = liveAppointments.filter { it.customer_id == customerId }
+                    rvAppointmentLog.layoutManager = LinearLayoutManager(this@AppointmentActivity)
+                    rvAppointmentLog.adapter = AppointmentLogAdapter(myAppts)
                 }
             }
             override fun onFailure(call: Call<BookedSlotsResponse>, t: Throwable) {
@@ -251,18 +259,7 @@ class AppointmentActivity : AppCompatActivity() {
             }
         } else baseSlots
 
-        // Step 5: 2-Hour Personal Cooldown Buffer
-        val finalSlots = currentFilteredSlots.filter { slot ->
-            val slotTime = timeFormat.parse(slot)!!
-            myAppointmentsToday.none { appt ->
-                val apptTime = timeFormat.parse(appt.appointment_time)!!
-                val diffMs = Math.abs(slotTime.time - apptTime.time)
-                val diffHours = diffMs / (1000 * 60 * 60.0)
-                diffHours < 2.0 // Strictly less than 2 hours difference
-            }
-        }
-
-        if (finalSlots.isEmpty()) {
+        if (currentFilteredSlots.isEmpty()) {
             tvFeedbackRow.text = "No slots available matching your schedule."
             tvFeedbackRow.setTextColor(Color.parseColor("#64748b"))
         } else {
@@ -270,7 +267,7 @@ class AppointmentActivity : AppCompatActivity() {
             tvFeedbackRow.text = "Select an available time for $selectedDateStr."
             tvFeedbackRow.setTextColor(Color.parseColor("#00327d"))
             rvTimeSlots.visibility = View.VISIBLE
-            rvTimeSlots.adapter = TimeSlotAdapter(finalSlots)
+            rvTimeSlots.adapter = TimeSlotAdapter(currentFilteredSlots)
         }
     }
 
@@ -501,5 +498,81 @@ class AppointmentActivity : AppCompatActivity() {
         }
 
         override fun getItemCount() = slots.size
+    }
+
+    // --- PHASE 3: Appointment Log Adapter ---
+    inner class AppointmentLogAdapter(private val myAppointments: List<BookedSlot>) : RecyclerView.Adapter<AppointmentLogAdapter.ViewHolder>() {
+        
+        inner class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
+            val tvService: TextView = view.findViewById(R.id.tvLogService)
+            val tvDateTime: TextView = view.findViewById(R.id.tvLogDateTime)
+            val tvStatus: TextView = view.findViewById(R.id.tvLogStatus)
+            val btnCancel: MaterialButton = view.findViewById(R.id.btnCancelAppointment)
+        }
+
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
+            val view = LayoutInflater.from(parent.context).inflate(R.layout.item_appointment_log, parent, false)
+            return ViewHolder(view)
+        }
+
+        override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+            val appt = myAppointments[position]
+            holder.tvService.text = appt.purpose ?: "Branch Visit"
+            holder.tvDateTime.text = "${appt.appointment_date} at ${appt.appointment_time}"
+            holder.tvStatus.text = appt.status.uppercase()
+            
+            // Status Color Coding
+            when (appt.status.lowercase()) {
+                "completed" -> {
+                    holder.tvStatus.setTextColor(Color.parseColor("#2e7d32")) // Green
+                    holder.tvStatus.setBackgroundColor(Color.parseColor("#e8f5e9"))
+                    holder.btnCancel.visibility = View.GONE
+                }
+                "cancelled" -> {
+                    holder.tvStatus.setTextColor(Color.parseColor("#c62828")) // Red
+                    holder.tvStatus.setBackgroundColor(Color.parseColor("#ffebee"))
+                    holder.btnCancel.visibility = View.GONE
+                }
+                "pending" -> {
+                    holder.tvStatus.setTextColor(Color.parseColor("#64748b")) // Gray
+                    holder.tvStatus.setBackgroundColor(Color.parseColor("#f1f5f9"))
+                    holder.btnCancel.visibility = View.VISIBLE
+                }
+                else -> {
+                    holder.tvStatus.setTextColor(Color.parseColor("#64748b"))
+                    holder.tvStatus.setBackgroundColor(Color.parseColor("#f1f5f9"))
+                    holder.btnCancel.visibility = View.GONE
+                }
+            }
+
+            holder.btnCancel.setOnClickListener {
+                if (appt.appointment_id != null) {
+                    performCancellation(appt.appointment_id)
+                } else {
+                    Toast.makeText(this@AppointmentActivity, "Cannot cancel: Missing ID", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+
+        override fun getItemCount() = myAppointments.size
+    }
+
+    private fun performCancellation(appointmentId: String) {
+        val tenantSchema = sessionManager.getSchemaName() ?: "public"
+        val request = CancelAppointmentRequest(appointment_id = appointmentId, tenant_schema = tenantSchema)
+        
+        ApiClient.apiService.cancelAppointment(request).enqueue(object : Callback<BasicAuthResponse> {
+            override fun onResponse(call: Call<BasicAuthResponse>, response: Response<BasicAuthResponse>) {
+                if (response.isSuccessful && response.body()?.status == "success") {
+                    Toast.makeText(this@AppointmentActivity, "Appointment Terminated", Toast.LENGTH_SHORT).show()
+                    fetchLiveSchedule() // Refresh UI
+                } else {
+                    Toast.makeText(this@AppointmentActivity, "Fail: ${response.body()?.message}", Toast.LENGTH_SHORT).show()
+                }
+            }
+            override fun onFailure(call: Call<BasicAuthResponse>, t: Throwable) {
+                Toast.makeText(this@AppointmentActivity, "Network Error: ${t.message}", Toast.LENGTH_SHORT).show()
+            }
+        })
     }
 }
